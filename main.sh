@@ -1,14 +1,13 @@
 #!/bin/bash
+export OUTPUTS="outputs"
+export ORGANIZATION_OUTPUTS=$OUTPUTS/"organizations"
+export GENESIS_BLOCK_OUTPUTS=$OUTPUTS/"system-genesis-block"
 
 export PATH=${PWD}/bin:$PATH
-export FABRIC_CFG_PATH=${PWD}/configtx
 export VERBOSE=false
 
 . utils.sh
 
-export OUTPUTS="outputs"
-export ORGANIZATION_OUTPUTS=$OUTPUTS/"organizations"
-export GENESIS_BLOCK_OUTPUTS=$OUTPUTS/"system-genesis-block"
 
 # generate certificates using cryptogen
 function createOrgs() {
@@ -62,8 +61,12 @@ function createConsortium() {
 
     infoln "Generating Orderer Genesis block"
 
+    # copy configtx.yaml to output folder
+    # mkdir $OUTPUTS/configtx
+    cp ./configtx/configtx.yaml $OUTPUTS/configtx.yaml
+
     set -x
-    configtxgen -profile TwoOrgsOrdererGenesis -channelID system-channel -outputBlock $GENESIS_BLOCK_OUTPUTS/genesis.block
+    configtxgen -profile TwoOrgsOrdererGenesis -channelID system-channel -outputBlock $GENESIS_BLOCK_OUTPUTS/genesis.block -configPath $OUTPUTS
     res=$?
     { set +x; } 2>/dev/null
     if [ $res -ne 0 ]; then
@@ -71,6 +74,6 @@ function createConsortium() {
     fi
 }
 
-
+rm -rf $OUTPUTS
 createOrgs
 createConsortium
