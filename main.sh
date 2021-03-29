@@ -61,8 +61,6 @@ function createConsortium() {
 
     infoln "Generating Orderer Genesis block"
 
-    # copy configtx.yaml to output folder
-    # mkdir $OUTPUTS/configtx
     cp ./configtx/configtx.yaml $OUTPUTS/configtx.yaml
 
     set -x
@@ -74,6 +72,22 @@ function createConsortium() {
     fi
 }
 
+COMPOSE_FILE_BASE=docker/docker-compose-test-net.yaml
+IMAGETAG="latest"
+
+function startNetwork() {
+
+    COMPOSE_FILES="-f ${COMPOSE_FILE_BASE}"
+    IMAGE_TAG=$IMAGETAG docker-compose ${COMPOSE_FILES} up -d 2>&1
+
+    docker ps -a
+    if [ $? -ne 0 ]; then
+      fatalln "Unable to start network"
+    fi
+}
+
+
 rm -rf $OUTPUTS
 createOrgs
 createConsortium
+startNetwork
