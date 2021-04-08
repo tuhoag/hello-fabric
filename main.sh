@@ -139,6 +139,7 @@ BLOCKFILE="${OUTPUTS}/channel-artifacts/${CHANNEL_NAME}.block"
 
 function createChannel() {
   # setGlobals 1
+  cp ./configtx/core.yaml $OUTPUTS/core.yaml
   FABRIC_CFG_PATH=${PWD}/outputs/
   infoln $FABRIC_CFG_PATH
   infoln $CORE_PEER_MSPCONFIGPATH
@@ -218,8 +219,8 @@ if [ "$MODE" == "test" ]; then
   createOrgs
   createConsortium
   startNetwork
-  # createChannelTx
-  # createChannel
+  createChannelTx
+  createChannel
   stopNetwork
 elif [ "$MODE" == "createOrgs" ]; then
   createOrgs
