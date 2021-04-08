@@ -69,7 +69,7 @@ function createConsortium() {
 }
 
 COMPOSE_FILE_BASE=docker/docker-compose-test-net.yaml
-IMAGE_TAG="latest"
+IMAGETAG="latest"
 
 function startNetwork() {
   infoln "Starting the network"
@@ -77,7 +77,7 @@ function startNetwork() {
   COMPOSE_FILE="-f ${COMPOSE_FILE_BASE}"
   # IMAGE_TAG=$IMAGETAG docker-compose ${COMPOSE_FILES} up -d 2>&1
 
-  docker-compose ${COMPOSE_FILE} up -d 2>&1
+  IMAGE_TAG=$IMAGETAG docker-compose ${COMPOSE_FILE} up -d 2>&1
 
   echo $IMAGE_TAG
 
@@ -91,15 +91,69 @@ function stopNetwork() {
   infoln "Stopping the network"
 
   COMPOSE_FILE="-f ${COMPOSE_FILE_BASE}"
-  docker-compose ${COMPOSE_FILE} down 2>&1
+  IMAGE_TAG=$IMAGETAG docker-compose ${COMPOSE_FILE} down 2>&1
 }
 
 function clearOutputs() {
   rm -rf $OUTPUTS
 }
 
-clearOutputs
-createOrgs
-createConsortium
-startNetwork
-stopNetwork
+CHANNEL_NAME="mychannel"
+DELAY="3"
+MAX_RETRY="5"
+VERBOSE="false"
+# : ${CHANNEL_NAME:="mychannel"}
+# : ${DELAY:="3"}
+# : ${MAX_RETRY:="5"}
+# : ${VERBOSE:="false"}
+
+
+function createChannelTx() {
+  if [ ! -d "channel-artifacts" ]; then
+    mkdir channel-artifacts
+  fi
+
+  # infoln $CHANNEL_NAME
+  # infoln $DELAY
+  # infoln $MAX_RETRY
+  # infoln $VERBOSE
+
+	set -x
+	configtxgen -profile TwoOrgsChannel -outputCreateChannelTx $OUTPUTS/channel-artifacts/${CHANNEL_NAME}.tx -channelID $CHANNEL_NAME -configPath $OUTPUTS
+	res=$?
+	{ set +x; } 2>/dev/null
+  verifyResult $res "Failed to generate channel configuration transaction..."
+}
+
+function createChannel() {
+  setGlobals 1
+	# Poll in case the raft leader is not set yet
+	local rc=1
+	local COUNTER=1
+	while [ $rc -ne 0 -a $COUNTER -lt $MAX_RETRY ] ; do
+		sleep $DELAY
+		set -x
+		peer channel create -o localhost:7050 -c $CHANNEL_NAME --ordererTLSHostnameOverride orderer.example.com -f ./channel-artifacts/${CHANNEL_NAME}.tx --outputBlock $BLOCKFILE --tls --cafile $ORDERER_CA >&log.txt
+		res=$?
+		{ set +x; } 2>/dev/null
+		let rc=$res
+		COUNTER=$(expr $COUNTER + 1)
+	done
+	cat log.txt
+	verifyResult $res "Channel creation failed"
+}
+
+function verifyResult() {
+  if [ $1 -ne 0 ]; then
+    fatalln "$2"
+  fi
+}
+
+
+# clearOutputs
+# createOrgs
+# createConsortium
+# startNetwork
+createChannelTx
+createChannel
+# stopNetwork
