@@ -41,7 +41,7 @@ services:
     volumes:
         - ../outputs/system-genesis-block/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
         - ../outputs/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp:/var/hyperledger/orderer/msp
-        - ..outputs/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/:/var/hyperledger/orderer/tls
+        - ../outputs/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/:/var/hyperledger/orderer/tls
         - orderer.example.com:/var/hyperledger/production/orderer
     ports:
       - 7050:7050

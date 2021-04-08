@@ -5,6 +5,7 @@ export GENESIS_BLOCK_OUTPUTS=$OUTPUTS/"system-genesis-block"
 
 export PATH=${PWD}/bin:$PATH
 export VERBOSE=false
+export FABRIC_CFG_PATH=$OUTPUTS
 
 . utils.sh
 
@@ -100,7 +101,7 @@ function clearOutputs() {
 
 CHANNEL_NAME="mychannel"
 DELAY="3"
-MAX_RETRY="5"
+MAX_RETRY="2"
 VERBOSE="false"
 # : ${CHANNEL_NAME:="mychannel"}
 # : ${DELAY:="3"}
@@ -125,15 +126,30 @@ function createChannelTx() {
   verifyResult $res "Failed to generate channel configuration transaction..."
 }
 
+export ORDERER_CA=${PWD}/outputs/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+export CORE_PEER_TLS_ENABLED=true
+export USING_ORG=1
+export CORE_PEER_LOCALMSPID="Org1MSP"
+export CORE_PEER_ADDRESS=localhost:7051
+export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/outputs/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+export CORE_PEER_MSPCONFIGPATH=${PWD}/outputs/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
+export CORE_PEER_ADDRESS=localhost:7051
+
+BLOCKFILE="${OUTPUTS}/channel-artifacts/${CHANNEL_NAME}.block"
+
 function createChannel() {
-  setGlobals 1
+  # setGlobals 1
+  FABRIC_CFG_PATH=${PWD}/outputs/
+  infoln $FABRIC_CFG_PATH
+  infoln $CORE_PEER_MSPCONFIGPATH
 	# Poll in case the raft leader is not set yet
 	local rc=1
 	local COUNTER=1
 	while [ $rc -ne 0 -a $COUNTER -lt $MAX_RETRY ] ; do
 		sleep $DELAY
+    infoln "-f ${OUTPUT}/channel-artifacts/${CHANNEL_NAME}.tx"
 		set -x
-		peer channel create -o localhost:7050 -c $CHANNEL_NAME --ordererTLSHostnameOverride orderer.example.com -f ./channel-artifacts/${CHANNEL_NAME}.tx --outputBlock $BLOCKFILE --tls --cafile $ORDERER_CA >&log.txt
+		peer channel create -o localhost:7050 -c $CHANNEL_NAME --ordererTLSHostnameOverride orderer.example.com -f ./outputs/channel-artifacts/${CHANNEL_NAME}.tx --outputBlock $BLOCKFILE --tls --cafile $ORDERER_CA >&log.txt
 		res=$?
 		{ set +x; } 2>/dev/null
 		let rc=$res
@@ -149,11 +165,79 @@ function verifyResult() {
   fi
 }
 
+setGlobals() {
+  local USING_ORG=""
+  if [ -z "$OVERRIDE_ORG" ]; then
+    USING_ORG=$1
+  else
+    USING_ORG="${OVERRIDE_ORG}"
+  fi
+  infoln "Using organization ${USING_ORG}"
+  if [ $USING_ORG -eq 1 ]; then
+    export CORE_PEER_LOCALMSPID="Org1MSP"
+    export CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_ORG1_CA
+    export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
+    export CORE_PEER_ADDRESS=localhost:7051
+  elif [ $USING_ORG -eq 2 ]; then
+    export CORE_PEER_LOCALMSPID="Org2MSP"
+    export CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_ORG2_CA
+    export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp
+    export CORE_PEER_ADDRESS=localhost:9051
+
+  elif [ $USING_ORG -eq 3 ]; then
+    export CORE_PEER_LOCALMSPID="Org3MSP"
+    export CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_ORG3_CA
+    export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org3.example.com/users/Admin@org3.example.com/msp
+    export CORE_PEER_ADDRESS=localhost:11051
+  else
+    errorln "ORG Unknown"
+  fi
+
+  if [ "$VERBOSE" == "true" ]; then
+    env | grep CORE
+  fi
+}
+
+
+
+# Parse commandline args
+
+## Parse mode
+if [[ $# -lt 1 ]] ; then
+  printHelp
+  exit 0
+else
+  MODE=$1
+  shift
+fi
+
+
+if [ "$MODE" == "test" ]; then
+  infoln "Starting nodes with CLI timeout of '${MAX_RETRY}' tries and CLI delay of '${CLI_DELAY}' seconds and using database '${DATABASE}' ${CRYPTO_MODE}"
+  clearOutputs
+  createOrgs
+  createConsortium
+  startNetwork
+  # createChannelTx
+  # createChannel
+  stopNetwork
+elif [ "$MODE" == "createOrgs" ]; then
+  createOrgs
+  createConsortium
+elif [ "$MODE" == "up" ]; then
+  startNetwork
+elif [ "$MODE" == "createChannel" ]; then
+  createChannelTx
+  createChannel
+elif [ "$MODE" == "down" ]; then
+  clearOutputs
+  stopNetwork
+fi
 
 # clearOutputs
 # createOrgs
 # createConsortium
 # startNetwork
-createChannelTx
-createChannel
+# createChannelTx
+# createChannel
 # stopNetwork
