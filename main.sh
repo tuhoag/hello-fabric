@@ -100,7 +100,8 @@ function clearOutputs() {
   rm -rf $OUTPUTS
 }
 
-CHANNEL_NAME="mychannel2"
+FABRIC_LOGGING_SPEC=DEBUG
+CHANNEL_NAME="mychannel"
 DELAY="3"
 MAX_RETRY="2"
 VERBOSE="false"
