@@ -58,10 +58,11 @@ function createConsortium() {
 
   infoln "Generating Orderer Genesis block"
 
-  cp ./configtx/configtx.yaml $OUTPUTS/configtx.yaml
+  cp ./config/configtx.yaml $OUTPUTS/configtx.yaml
+
 
   set -x
-  configtxgen -profile TwoOrgsOrdererGenesis -channelID system-channel -outputBlock $GENESIS_BLOCK_OUTPUTS/genesis.block -configPath $OUTPUTS
+  configtxgen -profile TwoOrgsOrdererGenesis -channelID system-channel -outputBlock $GENESIS_BLOCK_OUTPUTS/genesis.block -configPath ./outputs
   res=$?
   { set +x; } 2>/dev/null
   if [ $res -ne 0 ]; then
@@ -70,7 +71,7 @@ function createConsortium() {
 }
 
 COMPOSE_FILE_BASE=docker/docker-compose-test-net.yaml
-IMAGETAG="latest"
+IMAGETAG="2.2.2"
 
 function startNetwork() {
   infoln "Starting the network"
@@ -99,7 +100,7 @@ function clearOutputs() {
   rm -rf $OUTPUTS
 }
 
-CHANNEL_NAME="mychannel"
+CHANNEL_NAME="mychannel2"
 DELAY="3"
 MAX_RETRY="2"
 VERBOSE="false"
@@ -128,18 +129,17 @@ function createChannelTx() {
 
 export ORDERER_CA=${PWD}/outputs/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
 export CORE_PEER_TLS_ENABLED=true
-export USING_ORG=1
-export CORE_PEER_LOCALMSPID="Org1MSP"
-export CORE_PEER_ADDRESS=localhost:7051
-export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/outputs/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
-export CORE_PEER_MSPCONFIGPATH=${PWD}/outputs/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
-export CORE_PEER_ADDRESS=localhost:7051
+# export USING_ORG=2
+# export CORE_PEER_LOCALMSPID="Org2MSP"
+# export CORE_PEER_ADDRESS=localhost:9051
+# export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/outputs/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
+# export CORE_PEER_MSPCONFIGPATH=${PWD}/outputs/organizations/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp
 
 BLOCKFILE="${OUTPUTS}/channel-artifacts/${CHANNEL_NAME}.block"
 
 function createChannel() {
-  # setGlobals 1
-  cp ./configtx/core.yaml $OUTPUTS/core.yaml
+  setGlobals 1
+  cp ./config/core.yaml $OUTPUTS/core.yaml
   FABRIC_CFG_PATH=${PWD}/outputs/
   infoln $FABRIC_CFG_PATH
   infoln $CORE_PEER_MSPCONFIGPATH
@@ -177,18 +177,18 @@ setGlobals() {
   if [ $USING_ORG -eq 1 ]; then
     export CORE_PEER_LOCALMSPID="Org1MSP"
     export CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_ORG1_CA
-    export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
+    export CORE_PEER_MSPCONFIGPATH=${PWD}/${ORGANIZATION_OUTPUTS}/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
     export CORE_PEER_ADDRESS=localhost:7051
   elif [ $USING_ORG -eq 2 ]; then
     export CORE_PEER_LOCALMSPID="Org2MSP"
     export CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_ORG2_CA
-    export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp
+    export CORE_PEER_MSPCONFIGPATH=${PWD}/${ORGANIZATION_OUTPUTS}/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp
     export CORE_PEER_ADDRESS=localhost:9051
 
   elif [ $USING_ORG -eq 3 ]; then
     export CORE_PEER_LOCALMSPID="Org3MSP"
     export CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_ORG3_CA
-    export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org3.example.com/users/Admin@org3.example.com/msp
+    export CORE_PEER_MSPCONFIGPATH=${PWD}/${ORGANIZATION_OUTPUTS}/peerOrganizations/org3.example.com/users/Admin@org3.example.com/msp
     export CORE_PEER_ADDRESS=localhost:11051
   else
     errorln "ORG Unknown"
@@ -231,8 +231,9 @@ elif [ "$MODE" == "createChannel" ]; then
   createChannelTx
   createChannel
 elif [ "$MODE" == "down" ]; then
-  clearOutputs
   stopNetwork
+elif [ "$MODE" == "clean" ]; then
+  clearOutputs
 fi
 
 # clearOutputs
