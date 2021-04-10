@@ -227,7 +227,10 @@ elif [ "$MODE" == "createOrgs" ]; then
   createOrgs
   createConsortium
 elif [ "$MODE" == "up" ]; then
+  createOrgs
+  createConsortium
   startNetwork
+
 elif [ "$MODE" == "createChannel" ]; then
   createChannelTx
   createChannel
