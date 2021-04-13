@@ -202,6 +202,10 @@ function joinChannel() {
 	verifyResult $res "After $MAX_RETRY attempts, peer0.org${ORG} has failed to join channel '$CHANNEL_NAME' "
 }
 
+# function deployChaincode() {
+
+# }
+
 function verifyResult() {
   if [ $1 -ne 0 ]; then
     fatalln "$2"
