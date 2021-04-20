@@ -6,6 +6,7 @@ export GENESIS_BLOCK_OUTPUTS=$OUTPUTS/"system-genesis-block"
 export PATH=${PWD}/bin:$PATH
 export VERBOSE=false
 export FABRIC_CFG_PATH=${PWD}/${OUTPUTS}
+export COMPOSE_PROJECT_NAME="hello"
 # temp
 . utils.sh
 
@@ -91,14 +92,18 @@ function startNetwork() {
 
 function stopNetwork() {
   infoln "Stopping the network"
+  docker stop logspout
+  docker rm logspout
 
   COMPOSE_FILE="-f ${COMPOSE_FILE_BASE}"
   IMAGE_TAG=$IMAGETAG docker-compose ${COMPOSE_FILE} down --volumes --remove-orphans 2>&1
+
 }
 
 function clearOutputs() {
   rm -rf $OUTPUTS
 }
+
 
 FABRIC_LOGGING_SPEC=DEBUG
 CHANNEL_NAME="mychannel1"
@@ -298,7 +303,7 @@ function approveForMyOrg() {
 }
 
 
-checkCommitReadiness() {
+function checkCommitReadiness() {
   ORG=$1
   shift 1
   setGlobals $ORG
@@ -331,7 +336,7 @@ checkCommitReadiness() {
 # parsePeerConnectionParameters $@
 # Helper function that sets the peer connection parameters for a chaincode
 # operation
-parsePeerConnectionParameters() {
+function parsePeerConnectionParameters() {
   PEER_CONN_PARMS=""
   PEERS=""
   while [ "$#" -gt 0 ]; do
@@ -344,8 +349,8 @@ parsePeerConnectionParameters() {
     TLSINFO=$(eval echo "--tlsRootCertFiles $CORE_PEER_TLS_ROOTCERT_FILE")
     PEER_CONN_PARMS="$PEER_CONN_PARMS $TLSINFO"
 
-    infoln "PEERS_CONN_PARMS: ${PEER_CONN_PARMS}"
-    infoln "PEERS: ${PEERS}"
+    # infoln "PEERS_CONN_PARMS: ${PEER_CONN_PARMS}"
+    # infoln "PEERS: ${PEERS}"
     # shift by one to get to the next organization
     shift
   done
@@ -354,7 +359,7 @@ parsePeerConnectionParameters() {
 }
 
 # commitChaincodeDefinition VERSION PEER ORG (PEER ORG)...
-commitChaincodeDefinition() {
+function commitChaincodeDefinition() {
   parsePeerConnectionParameters $@
   res=$?
   verifyResult $res "Invoke transaction failed on channel '$CHANNEL_NAME' due to uneven number of peer and org parameters "
@@ -371,7 +376,7 @@ commitChaincodeDefinition() {
   successln "Chaincode definition committed on channel '$CHANNEL_NAME'"
 }
 
-queryCommitted() {
+function queryCommitted() {
   ORG=$1
   setGlobals $ORG
   EXPECTED_RESULT="Version: ${CC_VERSION}, Sequence: ${CC_SEQUENCE}, Endorsement Plugin: escc, Validation Plugin: vscc"
@@ -397,6 +402,18 @@ queryCommitted() {
   else
     fatalln "After $MAX_RETRY attempts, Query chaincode definition result on peer0.org${ORG} is INVALID!"
   fi
+}
+
+function listCC() {
+  ORG=$1
+  setGlobals $ORG
+
+  set -x
+  peer chaincode list --channelID $CHANNEL_NAME >&log.txt
+  res=$?
+  { set +x; } 2>/dev/null
+  verifyResult $res "Invoke execution on $PEERS failed "
+  successln "Invoke transaction successful on $PEERS on channel '$CHANNEL_NAME'"
 }
 
 function deployCC() {
@@ -432,8 +449,76 @@ function deployCC() {
 }
 
 
+CC_INIT_FCN="InitLedger"
 
+function invokeInitCC() {
+  # infoln "Invoking Init Chaincode with $@\n"
+  parsePeerConnectionParameters $@
+  res=$?
+  verifyResult $res "Invoke transaction failed on channel '$CHANNEL_NAME' due to uneven number of peer and org parameters "
 
+  # while 'peer chaincode' command can get the orderer endpoint from the
+  # peer (if join was successful), let's supply it directly as we know
+  # it using the "-o" option
+  set -x
+  fcn_call='{"function":"'${CC_INIT_FCN}'","Args":[]}'
+  infoln "invoke fcn call:${fcn_call}"
+  peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls --cafile $ORDERER_CA -C $CHANNEL_NAME -n ${CC_NAME} $PEER_CONN_PARMS --isInit -c ${fcn_call} >&log.txt
+  res=$?
+  { set +x; } 2>/dev/null
+  cat log.txt
+  verifyResult $res "Invoke execution on $PEERS failed "
+  successln "Invoke transaction successful on $PEERS on channel '$CHANNEL_NAME'"
+}
+
+CC_CREATE_FCN="CreateAsset"
+function invokeCreateCC() {
+  parsePeerConnectionParameters $@
+  res=$?
+  verifyResult $res "Invoke transaction failed on channel '$CHANNEL_NAME' due to uneven number of peer and org parameters "
+
+  # while 'peer chaincode' command can get the orderer endpoint from the
+  # peer (if join was successful), let's supply it directly as we know
+  # it using the "-o" option
+  set -x
+  fcn_call='{"function":"'${CC_CREATE_FCN}'","Args":["a1","1","Ken"]}'
+  infoln "invoke fcn call:${fcn_call}"
+  peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls --cafile $ORDERER_CA -C $CHANNEL_NAME -n ${CC_NAME} $PEER_CONN_PARMS -c ${fcn_call} >&log.txt
+  res=$?
+  { set +x; } 2>/dev/null
+  cat log.txt
+  verifyResult $res "Invoke execution on $PEERS failed "
+  successln "Invoke transaction successful on $PEERS on channel '$CHANNEL_NAME'"
+}
+
+CC_READ_ALL_FCN="GetAllAssets"
+
+function invokeReadAllsCC() {
+  ORG=$1
+  setGlobals $ORG
+  infoln "Querying on peer0.org${ORG} on channel '$CHANNEL_NAME'..."
+
+  local rc=1
+  local COUNTER=1
+  # continue to poll
+  # we either get a successful response, or reach MAX RETRY
+  while [ $rc -ne 0 -a $COUNTER -lt $MAX_RETRY ]; do
+    sleep $DELAY
+    infoln "Attempting to Query peer0.org${ORG}, Retry after $DELAY seconds."
+    set -x
+    peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"Args":["'${CC_READ_ALL_FCN}'"]}' >&log.txt
+    res=$?
+    { set +x; } 2>/dev/null
+    let rc=$res
+    COUNTER=$(expr $COUNTER + 1)
+  done
+  cat log.txt
+  if test $rc -eq 0; then
+    successln "Query successful on peer0.org${ORG} on channel '$CHANNEL_NAME'"
+  else
+    fatalln "After $MAX_RETRY attempts, Query result on peer0.org${ORG} is INVALID!"
+  fi
+}
 
 # Parse commandline args
 
@@ -463,7 +548,7 @@ elif [ "$MODE" == "up" ]; then
   createOrgs
   createConsortium
   startNetwork
-
+  ./monitordocker.sh "${COMPOSE_PROJECT_NAME}_test" 8080
 elif [ "$MODE" == "createChannel" ]; then
   createChannelTx
   createChannel
@@ -471,9 +556,16 @@ elif [ "$MODE" == "createChannel" ]; then
   joinChannel 1
   # setGlobals 2
   joinChannel 2
+elif [ "$MODE" == "listCC" ]; then
+  listCC 1
+  listCC 2
 elif [ "$MODE" == "deployCC" ]; then
   deployCC
   # installChaincode
+elif [ "$MODE" == "invokeCC" ]; then
+  # invokeCreateCC 1
+  invokeReadAllsCC 1
+  # invokeInitCC 1 2
 elif [ "$MODE" == "down" ]; then
   stopNetwork
   clearOutputs

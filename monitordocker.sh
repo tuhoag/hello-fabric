@@ -27,5 +27,6 @@ docker run -d --name="logspout" \
 	--publish=127.0.0.1:${PORT}:80 \
 	--network  ${DOCKER_NETWORK} \
 	gliderlabs/logspout
-sleep 3
-curl http://127.0.0.1:${PORT}/logs
+# sleep 3
+# curl http://127.0.0.1:${PORT}/logs
+echo "Accessing to http://127.0.0.1:${PORT}/logs to read the log"
