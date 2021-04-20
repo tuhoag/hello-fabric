@@ -1,8 +1,10 @@
-package chaincode
+package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"log"
 
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
@@ -19,16 +21,10 @@ type Asset struct {
 	Owner string `json:"owner"`
 }
 
-
-// InitLedger adds a base set of assets to the ledger
 func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) error {
 	assets := []Asset{
 		{ID: "asset1", Value: 5, Owner: "Tomoko"},
 		{ID: "asset2", Value: 5, Owner: "Brad"},
-		{ID: "asset3", Value: 10, Owner: "Jin Soo"},
-		{ID: "asset4", Value: 10, Owner: "Max"},
-		{ID: "asset5", Value: 15, Owner: "Adriana"},
-		{ID: "asset6", Value: 15, Owner: "Michel"},
 	}
 
 	for _, asset := range assets {
@@ -46,25 +42,93 @@ func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) 
 	return nil
 }
 
-// CreateAsset issues a new asset to the world state with given details.
-// func (s *SmartContract) CreateAsset(ctx contractapi.TransactionContextInterface, id string, value int, owner string) error {
-// 	exists, err := s.AssetExists(ctx, id)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	if exists {
-// 		return fmt.Errorf("the asset %s already exists", id)
-// 	}
+// Create a new asset
+func (s *SmartContract) CreateAsset(ctx contractapi.TransactionContextInterface, id string, value int, owner string) error {
+	existing, err := ctx.GetStub().GetState(id)
 
-// 	asset := Asset{
-// 		ID:             id,
-// 		Value:          value,
-// 		Owner:          owner,
-// 	}
-// 	assetJSON, err := json.Marshal(asset)
-// 	if err != nil {
-// 		return err
-// 	}
+	if err != nil {
+		return errors.New("Unable to read the world state")
+	}
 
-// 	return ctx.GetStub().PutState(id, assetJSON)
-// }
+	if existing != nil {
+		return fmt.Errorf("Cannot create asset since its id %s is existed", id)
+	}
+
+	asset := Asset{
+		ID:    id,
+		Value: value,
+		Owner: owner,
+	}
+
+	assetJSON, err := json.Marshal(asset)
+	if err != nil {
+		return err
+	}
+
+	err = ctx.GetStub().PutState(id, assetJSON)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// ReadAsset returns the asset stored in the world state with given id.
+func (s *SmartContract) ReadAsset(ctx contractapi.TransactionContextInterface, id string) (*Asset, error) {
+	assetJSON, err := ctx.GetStub().GetState(id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read from world state: %v", err)
+	}
+	if assetJSON == nil {
+		return nil, fmt.Errorf("the asset %s does not exist", id)
+	}
+
+	var asset Asset
+	err = json.Unmarshal(assetJSON, &asset)
+	if err != nil {
+		return nil, err
+	}
+
+	return &asset, nil
+}
+
+// GetAllAssets returns all assets found in world state
+func (s *SmartContract) GetAllAssets(ctx contractapi.TransactionContextInterface) ([]*Asset, error) {
+	// range query with empty string for startKey and endKey does an
+	// open-ended query of all assets in the chaincode namespace.
+	resultsIterator, err := ctx.GetStub().GetStateByRange("", "")
+	if err != nil {
+		return nil, err
+	}
+	// close the resultsIterator when this function is finished
+	defer resultsIterator.Close()
+
+	var assets []*Asset
+	for resultsIterator.HasNext() {
+		queryResponse, err := resultsIterator.Next()
+		if err != nil {
+			return nil, err
+		}
+
+		var asset Asset
+		err = json.Unmarshal(queryResponse.Value, &asset)
+		if err != nil {
+			return nil, err
+		}
+		assets = append(assets, &asset)
+	}
+
+	return assets, nil
+}
+
+func main() {
+	assetChaincode, err := contractapi.NewChaincode(&SmartContract{})
+	if err != nil {
+		log.Panicf("Error creating hello chaincode: %v", err)
+	}
+
+	if err := assetChaincode.Start(); err != nil {
+		log.Panicf("Error starting hello chaincode: %v", err)
+	}
+}
