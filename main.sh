@@ -566,7 +566,7 @@ elif [ "$MODE" == "initCC" ]; then
   invokeInitCC 1 2
   invokeReadAllsCC 1
 elif [ "$MODE" == "createCC" ]; then
-  invokeCreateCC 1
+  invokeCreateCC 1 2
   invokeReadAllsCC 1
 
 elif [ "$MODE" == "down" ]; then
