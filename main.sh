@@ -286,7 +286,7 @@ function queryInstalled() {
 }
 
 CC_SEQUENCE=1
-# INIT_REQUIRED="--init-required"
+INIT_REQUIRED="--init-required"
 # PACKAGE_ID=$(sed -n "/${CC_NAME}_${CC_VERSION}/{s/^Package ID: //; s/, Label:.*$//; p;}" log.txt)
 
 function approveForMyOrg() {
@@ -562,10 +562,13 @@ elif [ "$MODE" == "listCC" ]; then
 elif [ "$MODE" == "deployCC" ]; then
   deployCC
   # installChaincode
-elif [ "$MODE" == "invokeCC" ]; then
-  # invokeCreateCC 1
+elif [ "$MODE" == "initCC" ]; then
+  invokeInitCC 1 2
   invokeReadAllsCC 1
-  # invokeInitCC 1 2
+elif [ "$MODE" == "createCC" ]; then
+  invokeCreateCC 1
+  invokeReadAllsCC 1
+
 elif [ "$MODE" == "down" ]; then
   stopNetwork
   clearOutputs
