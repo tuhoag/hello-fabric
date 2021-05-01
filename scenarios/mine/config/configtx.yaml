@@ -1,0 +1,89 @@
+Organizations:
+  - &OrdererOrg
+  Name: OrdererMSP
+  ID: OrdererMSP
+  MSPDir: ./organizations/ordererOrganizations/example.com/msp
+  Policies:
+    Readers:
+      Type: Signature
+      Rule: "OR('OrdererMSP.member')"
+    Writers:
+      Type: Signature
+      Rule: "OR('OrdererMSP.member')"
+    Admins:
+      Type: Signature
+      Rule: "OR('OrdererMSP.admin')"
+  OrdererEndpoints:
+    - orderer.example.com:1000
+
+  - &Adv1
+    Name: Adv1MSP
+    ID: Adv1MSP
+    MSPDir: ./organizations/peerOrganizations/adv1.example.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('Adv1MSP.admin', 'Adv1MSP.peer', 'Adv1MSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('Adv1MSP.admin', 'Adv1MSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('Adv1MSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('Adv1MSP.peer')"
+
+  - &Bus1
+    Name: Bus1MSP
+    ID: Bus1MSP
+    MSPDir: ./organizations/peerOrganizations/bus1.example.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('Bus1MSP.admin', 'Bus1MSP.peer', 'Bus1MSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('Bus1MSP.admin', 'Bus1MSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('Bus1MSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('Bus1MSP.peer')"
+
+Capabilities:
+  Channel: &ChannelCapabilities
+    V2_0: true
+  Orderer: &OrdererCapabilities
+    V2_0: true
+  Application: &ApplicationCapabilities
+    V2_0: true
+
+Application: &ApplicationDefaults
+  Organizations:
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    LifecycleEndorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+    Endorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+  Capabilities:
+    <<: *ApplicationCapabilities
+
+Orderer:
+
+Channel:
+
+Profiles:
+

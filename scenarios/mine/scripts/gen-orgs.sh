@@ -3,21 +3,6 @@
 . $PWD/scripts/init.sh
 . $PWD/scripts/utils.sh
 
-function generateNormalOrg() {
-    infoln "Creating Org$1's Identities"
-    configPath=$ORG_CONFIG_PATH/crypto-config-org$1.yaml
-    infoln $configPath
-
-    generateOrg $configPath $ORGANIZATION_OUTPUTS
-}
-
-function generateOrdererOrgs() {
-    infoln "Creating Orderer Org's Identities"
-    configPath=$ORG_CONFIG_PATH/crypto-config-orderer.yaml
-
-    generateOrg $configPath $ORGANIZATION_OUTPUTS
-}
-
 function generateOrg() {
     configPath=$1
     outputPath=$2
@@ -35,13 +20,20 @@ function generateOrg() {
     fi
 }
 
-
+# check if cryptogen is accessible
+set -x
+which cryptogen
+{ set +x; } 2>/dev/null
+if [ "$?" -ne 0 ]; then
+fatalln "cryptogen tool not found."
+fi
 
 # get inputs
 if [ $# -eq 0 ]; then
-    # infoln "No arguments supplied"
-    generateOrdererOrgs
+    errorln "No arguments supplied"
+    # generateOrdererOrgs
 else
     org=$1
-    generateNormalOrg $org
+    configPath=$ORG_CONFIG_PATH/crypto-config-$org.yaml
+    generateOrg $configPath $ORGANIZATION_OUTPUTS
 fi
