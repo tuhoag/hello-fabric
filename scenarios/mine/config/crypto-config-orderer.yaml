@@ -1,6 +1,6 @@
 OrdererOrgs:
   - Name: order
-    Domain: example.com
+    Domain: promark.com
     EnableNodeOUs: true
     Specs:
       - Hostname: orderer

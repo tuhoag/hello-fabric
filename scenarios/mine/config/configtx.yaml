@@ -1,25 +1,25 @@
 Organizations:
   - &OrdererOrg
-  Name: OrdererMSP
-  ID: OrdererMSP
-  MSPDir: ./organizations/ordererOrganizations/example.com/msp
-  Policies:
-    Readers:
-      Type: Signature
-      Rule: "OR('OrdererMSP.member')"
-    Writers:
-      Type: Signature
-      Rule: "OR('OrdererMSP.member')"
-    Admins:
-      Type: Signature
-      Rule: "OR('OrdererMSP.admin')"
-  OrdererEndpoints:
-    - orderer.example.com:1000
+    Name: OrdererMSP
+    ID: OrdererMSP
+    MSPDir: ../organizations/ordererOrganizations/promark.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('OrdererMSP.member')"
+      Writers:
+        Type: Signature
+        Rule: "OR('OrdererMSP.member')"
+      Admins:
+        Type: Signature
+        Rule: "OR('OrdererMSP.admin')"
+    OrdererEndpoints:
+      - orderer.promark.com:1000
 
   - &Adv1
     Name: Adv1MSP
     ID: Adv1MSP
-    MSPDir: ./organizations/peerOrganizations/adv1.example.com/msp
+    MSPDir: ../organizations/peerOrganizations/adv1.promark.com/msp
     Policies:
       Readers:
         Type: Signature
@@ -37,7 +37,7 @@ Organizations:
   - &Bus1
     Name: Bus1MSP
     ID: Bus1MSP
-    MSPDir: ./organizations/peerOrganizations/bus1.example.com/msp
+    MSPDir: ../organizations/peerOrganizations/bus1.promark.com/msp
     Policies:
       Readers:
         Type: Signature
@@ -81,9 +81,81 @@ Application: &ApplicationDefaults
   Capabilities:
     <<: *ApplicationCapabilities
 
-Orderer:
+Orderer: &OrdererDefaults
+  OrdererType: etcdraft
+  Addresses:
+        - order.promark.com:7000
 
-Channel:
+  EtcdRaft:
+    Consenters:
+      - Host: orderer.promark.com
+        Port: 7000
+        ClientTLSCert: ../organizations/ordererOrganizations/promark.com/orderers/orderer.promark.com/tls/server.crt
+        ServerTLSCert: ../organizations/ordererOrganizations/promark.com/orderers/orderer.promark.com/tls/server.crt
+
+  BatchTimeout: 2s
+  BatchSize:
+    MaxMessageCount: 10
+    AbsoluteMaxBytes: 99 MB
+    PreferredMaxBytes: 512 KB
+
+  Organizations:
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    BlockValidation:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+
+Channel: &ChannelDefaults
+  Policies:
+    # Who may invoke the 'Deliver' API
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    # Who may invoke the 'Broadcast' API
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    # Who may modify elements at this config level
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+  Capabilities:
+    <<: *ChannelCapabilities
 
 Profiles:
+  TwoOrgsOrdererGenesis:
+    <<: *ChannelDefaults
+    Orderer:
+      <<: *OrdererDefaults
+      Organizations:
+        - *OrdererOrg
+      Capabilities:
+        <<: *OrdererCapabilities
+    Consortiums:
+      SampleConsortium:
+        Organizations:
+          - *Adv1
+          - *Bus1
+
+
+  TwoOrgsChannel:
+    Consortium: SampleConsortium
+    <<: *ChannelDefaults
+    Application:
+      <<: *ApplicationDefaults
+      Organizations:
+        - *Adv1
+        - *Bus1
+      Capabilities:
+        <<: *ApplicationCapabilities
+
 

@@ -1,6 +1,6 @@
 PeerOrgs:
   - Name: bus1
-    Domain: bus1.example.com
+    Domain: bus1.promark.com
     EnableNodeOUs: true
     Template:
       Count: 1
