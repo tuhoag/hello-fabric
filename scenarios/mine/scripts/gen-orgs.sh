@@ -25,7 +25,7 @@ set -x
 which cryptogen
 { set +x; } 2>/dev/null
 if [ "$?" -ne 0 ]; then
-fatalln "cryptogen tool not found."
+    fatalln "cryptogen tool not found."
 fi
 
 # get inputs

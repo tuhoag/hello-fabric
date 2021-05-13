@@ -7,3 +7,4 @@ ORG_CONFIG_PATH=$CONFIG_PATH
 OUTPUT_PATH=$PWD/outputs
 ORGANIZATION_OUTPUTS=$PWD/organizations
 CHANNEL_PATH=$PWD/channels
+DOCKER_PATH=$PWD/docker/docker-compose.yml

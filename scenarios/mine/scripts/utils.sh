@@ -26,7 +26,6 @@ function infoln() {
     println "${C_BLUE}${1}${C_RESET}"
 }
 
-
 # warnln echos in yellow color
 function warnln() {
     println "${C_YELLOW}${1}${C_RESET}"
