@@ -10,10 +10,10 @@ networks:
 
 services:
     orderer.promark.com:
-        container_name: orderer.example.com
+        container_name: orderer.promark.com
         image: hyperledger/fabric-orderer:$IMAGE_TAG
         ports:
-            - 7050:7050
+            - 7000:7000
         networks:
             - test
         working_dir: /opt/gopath/src/github.com/hyperledger/fabric
@@ -21,7 +21,7 @@ services:
         environment:
             - FABRIC_LOGGING_SPEC=INFO
             - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
-            - ORDERER_GENERAL_LISTENPORT=7050
+            - ORDERER_GENERAL_LISTENPORT=7000
             - ORDERER_GENERAL_GENESISMETHOD=file
             - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
             - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
@@ -44,12 +44,12 @@ services:
             - orderer.promark.com:/var/hyperledger/production/orderer
 
     peer0.adv1.promark.com:
-        container_name: peer0.org1.example.com
+        container_name: peer0.adv1.promark.com
         image: hyperledger/fabric-peer:$IMAGE_TAG
         working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
         command: peer node start
         ports:
-            - 7051:7051
+            - 8000:8000
         networks:
             - test
         environment:
@@ -58,7 +58,7 @@ services:
             # the following setting starts chaincode containers on the same
             # bridge network as the peers
             # https://docs.docker.com/compose/networking/
-            - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_test
+            - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${PROJECT_NAME}_test
             - FABRIC_LOGGING_SPEC=INFO
             #- FABRIC_LOGGING_SPEC=DEBUG
             - CORE_PEER_TLS_ENABLED=true
@@ -67,19 +67,19 @@ services:
             - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
             - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
             # Peer specific variabes
-            - CORE_PEER_ID=peer0.org1.example.com
-            - CORE_PEER_ADDRESS=peer0.org1.example.com:7051
-            - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
-            - CORE_PEER_CHAINCODEADDRESS=peer0.org1.example.com:7052
-            - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
-            - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org1.example.com:7051
-            - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org1.example.com:7051
-            - CORE_PEER_LOCALMSPID=Org1MSP
+            - CORE_PEER_ID=peer0.adv1.promark.com
+            - CORE_PEER_ADDRESS=peer0.adv1.promark.com:8000
+            - CORE_PEER_LISTENADDRESS=0.0.0.0:8000
+            - CORE_PEER_CHAINCODEADDRESS=peer0.adv1.promark.com:8001
+            - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:8001
+            - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.adv1.promark.com:8000
+            - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.adv1.promark.com:8000
+            - CORE_PEER_LOCALMSPID=Adv1MSP
         volumes:
             - /var/run/docker.sock:/host/var/run/docker.sock
-            - ../outputs/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp:/etc/hyperledger/fabric/msp
-            - ../outputs/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls:/etc/hyperledger/fabric/tls
-            - peer0.org1.example.com:/var/hyperledger/production
+            - ../organizations/peerOrganizations/adv1.promark.com/peers/peer0.adv1.promark.com/msp:/etc/hyperledger/fabric/msp
+            - ../organizations/peerOrganizations/adv1.promark.com/peers/peer0.adv1.promark.com/tls:/etc/hyperledger/fabric/tls
+            - peer0.adv1.promark.com:/var/hyperledger/production
 
 
     peer0.bus1.promark.com:
@@ -88,7 +88,7 @@ services:
         working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
         command: peer node start
         ports:
-            - 9051:9051
+            - 9000:9000
         networks:
             - test
         environment:
@@ -97,7 +97,7 @@ services:
             # the following setting starts chaincode containers on the same
             # bridge network as the peers
             # https://docs.docker.com/compose/networking/
-            - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_test
+            - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${PROJECT_NAME}_test
             - FABRIC_LOGGING_SPEC=INFO
             #- FABRIC_LOGGING_SPEC=DEBUG
             - CORE_PEER_TLS_ENABLED=true
@@ -106,16 +106,16 @@ services:
             - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
             - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
             # Peer specific variabes
-            - CORE_PEER_ID=peer0.org2.example.com
-            - CORE_PEER_ADDRESS=peer0.org2.example.com:9051
-            - CORE_PEER_LISTENADDRESS=0.0.0.0:9051
-            - CORE_PEER_CHAINCODEADDRESS=peer0.org2.example.com:9052
-            - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:9052
-            - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org2.example.com:9051
-            - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org2.example.com:9051
-            - CORE_PEER_LOCALMSPID=Org2MSP
+            - CORE_PEER_ID=peer0.bus1.promark.com
+            - CORE_PEER_ADDRESS=peer0.bus1.promark.com:9000
+            - CORE_PEER_LISTENADDRESS=0.0.0.0:9000
+            - CORE_PEER_CHAINCODEADDRESS=peer0.bus1.promark.com:9001
+            - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:9001
+            - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.bus1.promark.com:9000
+            - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.bus1.promark.com:9000
+            - CORE_PEER_LOCALMSPID=Bus1MSP
         volumes:
             - /var/run/docker.sock:/host/var/run/docker.sock
-            - ../outputs/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/msp:/etc/hyperledger/fabric/msp
-            - ../outputs/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls:/etc/hyperledger/fabric/tls
-            - peer0.org2.example.com:/var/hyperledger/production
+            - ../organizations/peerOrganizations/bus1.promark.com/peers/peer0.bus1.promark.com/msp:/etc/hyperledger/fabric/msp
+            - ../organizations/peerOrganizations/bus1.promark.com/peers/peer0.bus1.promark.com/tls:/etc/hyperledger/fabric/tls
+            - peer0.bus1.promark.com:/var/hyperledger/production
