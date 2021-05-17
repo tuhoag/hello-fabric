@@ -10,6 +10,10 @@ function generateGenesisBlock() {
         fatalln "configtxgen tool not found."
     fi
 
+    if [ ! -d $CHANNEL_PATH ]; then
+        mkdir $CHANNEL_PATH
+    fi
+
     infoln "Generating Orderer Genesis block"
 
     #   cp ./config/configtx.yaml $OUTPUTS/configtx.yaml
