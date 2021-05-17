@@ -1,38 +1,38 @@
 Organizations:
   - &OrdererOrg
-    Name: OrdererMSP
-    ID: OrdererMSP
+    Name: ordererMSP
+    ID: ordererMSP
     MSPDir: ../organizations/ordererOrganizations/promark.com/msp
     Policies:
       Readers:
         Type: Signature
-        Rule: "OR('OrdererMSP.member')"
+        Rule: "OR('ordererMSP.member')"
       Writers:
         Type: Signature
-        Rule: "OR('OrdererMSP.member')"
+        Rule: "OR('ordererMSP.member')"
       Admins:
         Type: Signature
-        Rule: "OR('OrdererMSP.admin')"
+        Rule: "OR('ordererMSP.admin')"
     OrdererEndpoints:
       - orderer.promark.com:1000
 
   - &Adv1
-    Name: Adv1MSP
-    ID: Adv1MSP
+    Name: adv1MSP
+    ID: adv1MSP
     MSPDir: ../organizations/peerOrganizations/adv1.promark.com/msp
     Policies:
       Readers:
         Type: Signature
-        Rule: "OR('Adv1MSP.admin', 'Adv1MSP.peer', 'Adv1MSP.client')"
+        Rule: "OR('adv1MSP.admin', 'adv1MSP.peer', 'adv1MSP.client')"
       Writers:
         Type: Signature
-        Rule: "OR('Adv1MSP.admin', 'Adv1MSP.client')"
+        Rule: "OR('adv1MSP.admin', 'adv1MSP.client')"
       Admins:
         Type: Signature
-        Rule: "OR('Adv1MSP.admin')"
+        Rule: "OR('adv1MSP.admin')"
       Endorsement:
         Type: Signature
-        Rule: "OR('Adv1MSP.peer')"
+        Rule: "OR('adv1MSP.peer')"
 
   - &Bus1
     Name: Bus1MSP

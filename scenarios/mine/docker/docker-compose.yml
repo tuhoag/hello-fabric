@@ -24,7 +24,7 @@ services:
             - ORDERER_GENERAL_LISTENPORT=7050
             - ORDERER_GENERAL_GENESISMETHOD=file
             - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
-            - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+            - ORDERER_GENERAL_LOCALMSPID=ordererMSP
             - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
             # enabled TLS
             - ORDERER_GENERAL_TLS_ENABLED=true
@@ -92,7 +92,7 @@ services:
             - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
             - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.adv1.${COMPOSE_PROJECT_NAME}.com:7051
             - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.adv1.${COMPOSE_PROJECT_NAME}.com:7051
-            - CORE_PEER_LOCALMSPID=Adv1MSP
+            - CORE_PEER_LOCALMSPID=adv1MSP
             # - FABRIC_CFG_PATH=/etc/hyperledger/fabric/core.yaml
 
             # - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
