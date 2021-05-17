@@ -6,24 +6,18 @@
 
 
 function createChannel() {
-    selectPeer "adv1" 0
-
-    local channel_name=$1
+    local org_name=$1
+    local channel_name=$2
     local MAX_RETRY=3
     local DELAY="3"
     local MAX_RETRY="2"
     local VERBOSE="false"
-    # # cp ./config/core.yaml $OUTPUTS/core.yaml
-    # FABRIC_CFG_PATH=${PWD}/outputs/
-    # # infoln $FABRIC_CFG_PATH
-    # # infoln $CORE_PEER_MSPCONFIGPATH
-	# Poll in case the raft leader is not set yet
+
+    selectPeer $org_name 0
+
     getChannelTxPath $channel_name
     getBlockPath $channel_name
 
-    infoln $channel_tx_path
-    infoln $block_path
-    infoln $FABRIC_CFG_PATH
 	local rc=1
 	local num_tries=1
 	while [ $rc -ne 0 -a $num_tries -lt $MAX_RETRY ] ; do
@@ -40,6 +34,7 @@ function createChannel() {
 	verifyResult $res "Channel creation failed"
 }
 
-CHANNEL_NAME=$1
+ORG_NAME=$1
+CHANNEL_NAME=$2
 
-createChannel $CHANNEL_NAME
+createChannel $ORG_NAME $CHANNEL_NAME
