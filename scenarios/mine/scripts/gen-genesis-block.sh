@@ -19,7 +19,7 @@ function generateGenesisBlock() {
     #   cp ./config/configtx.yaml $OUTPUTS/configtx.yaml
 
     set -x
-    configtxgen -profile TwoOrgsOrdererGenesis -channelID system-channel -outputBlock $CHANNEL_PATH/genesis.block -configPath $OUTPUT_PATH -configPath $CONFIG_PATH
+    configtxgen -profile TwoOrgsOrdererGenesis -channelID system-channel -outputBlock $CHANNEL_PATH/genesis.block -configPath $CONFIG_PATH
     res=$?
     { set +x; } 2>/dev/null
     if [ $res -ne 0 ]; then
