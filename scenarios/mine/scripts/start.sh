@@ -2,11 +2,13 @@
 
 . $PWD/scripts/init.sh
 . $PWD/scripts/utils.sh
+. $PWD/scripts/settings.sh
 
 function startNetwork() {
     infoln "Starting the network"
+    infoln $FABRIC_CFG_PATH
 
-    PROJECT_NAME=$PROJECT_NAME IMAGE_TAG=$FABRIC_VERSION docker-compose -f ${DOCKER_COMPOSE_PATH} up -d 2>&1
+    COMPOSE_PROJECT_NAME=$PROJECT_NAME PROJECT_NAME=$PROJECT_NAME IMAGE_TAG=$FABRIC_VERSION docker-compose -f ${DOCKER_COMPOSE_PATH} up -d 2>&1
 
     docker ps -a
     if [ $? -ne 0 ]; then

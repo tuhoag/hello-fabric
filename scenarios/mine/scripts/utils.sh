@@ -37,6 +37,46 @@ function fatalln() {
     exit 1
 }
 
+function verifyResult() {
+  if [ $1 -ne 0 ]; then
+    fatalln "$2"
+  fi
+}
+
+function selectPeer() {
+    local ORG_NAME=$1
+    local PEER_NAME=$2
+    #   local USING_ORG=""
+    #   if [ -z "$OVERRIDE_ORG" ]; then
+    #     USING_ORG=$1
+    #   else
+    #     USING_ORG="${OVERRIDE_ORG}"
+    #   fi
+    infoln "Selecting organization ${ORG_NAME}'s peer${PEER_NAME}"
+
+    export CORE_PEER_LOCALMSPID="${ORG_NAME}MSP"
+    export CORE_PEER_TLS_ROOTCERT_FILE=${ORGANIZATION_OUTPUTS}/peerOrganizations/${ORG_NAME}.${PROJECT_NAME}.com/peers/peer${PEER_NAME}.${ORG_NAME}.${PROJECT_NAME}.com/tls/ca.crt
+    # $PEER0_ORG1_CA
+    export CORE_PEER_MSPCONFIGPATH=${ORGANIZATION_OUTPUTS}/peerOrganizations/${ORG_NAME}.${PROJECT_NAME}.com/users/Admin@${ORG_NAME}.${PROJECT_NAME}.com/msp
+    export CORE_PEER_ADDRESS=localhost:7051
+
+    if [ "$VERBOSE" == "true" ]; then
+        env | grep CORE
+    fi
+}
+
+function getChannelTxPath() {
+    channel_name=$1
+    channel_tx_path=$CHANNEL_PATH/${channel_name}.tx
+    # return $channel_tx_path
+}
+
+function getBlockPath() {
+    channel_name=$1
+    block_path="$CHANNEL_PATH/${channel_name}.block"
+    # return $block_path
+}
+
 export -f errorln
 export -f successln
 export -f infoln

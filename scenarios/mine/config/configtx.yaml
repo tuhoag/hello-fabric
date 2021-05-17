@@ -84,12 +84,12 @@ Application: &ApplicationDefaults
 Orderer: &OrdererDefaults
   OrdererType: etcdraft
   Addresses:
-        - order.promark.com:7000
+        - order.promark.com:7050
 
   EtcdRaft:
     Consenters:
       - Host: orderer.promark.com
-        Port: 7000
+        Port: 7050
         ClientTLSCert: ../organizations/ordererOrganizations/promark.com/orderers/orderer.promark.com/tls/server.crt
         ServerTLSCert: ../organizations/ordererOrganizations/promark.com/orderers/orderer.promark.com/tls/server.crt
 
@@ -144,7 +144,7 @@ Profiles:
       SampleConsortium:
         Organizations:
           - *Adv1
-          - *Bus1
+          # - *Bus1
 
 
   TwoOrgsChannel:
@@ -154,7 +154,7 @@ Profiles:
       <<: *ApplicationDefaults
       Organizations:
         - *Adv1
-        - *Bus1
+        # - *Bus1
       Capabilities:
         <<: *ApplicationCapabilities
 

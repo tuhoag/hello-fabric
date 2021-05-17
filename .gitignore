@@ -1,2 +1,4 @@
 /scenarios/*/outputs
 log.txt
+/scenarios/mine/volumes
+/scenarios/mine/organizations

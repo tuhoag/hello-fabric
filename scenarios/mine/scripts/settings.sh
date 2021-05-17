@@ -10,3 +10,5 @@ CHANNEL_PATH=$PWD/channels
 DOCKER_COMPOSE_PATH=$PWD/docker/docker-compose.yml
 FABRIC_VERSION=2.2
 PROJECT_NAME=promark
+ORDERER_CA=$ORGANIZATION_OUTPUTS/ordererOrganizations/$PROJECT_NAME.com/orderers/orderer.$PROJECT_NAME.com/msp/tlscacerts/tlsca.$PROJECT_NAME.com-cert.pem
+export FABRIC_CFG_PATH=$CONFIG_PATH
