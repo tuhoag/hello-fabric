@@ -6,8 +6,8 @@
 
 
 function createChannel() {
-    local org_name=$1
-    local channel_name=$2
+    local channel_name=$1
+    local org_name=$2
     local MAX_RETRY=3
     local DELAY="3"
     local MAX_RETRY="2"
@@ -34,7 +34,4 @@ function createChannel() {
 	verifyResult $res "Channel creation failed"
 }
 
-ORG_NAME=$1
-CHANNEL_NAME=$2
-
-createChannel $ORG_NAME $CHANNEL_NAME
+createChannel $1 $2

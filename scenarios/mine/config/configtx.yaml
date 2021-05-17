@@ -34,6 +34,24 @@ Organizations:
         Type: Signature
         Rule: "OR('adv1MSP.peer')"
 
+  - &Bus1
+    Name: bus1MSP
+    ID: bus1MSP
+    MSPDir: ../organizations/peerOrganizations/bus1.promark.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('bus1MSP.admin', 'bus1MSP.peer', 'bus1MSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('bus1MSP.admin', 'bus1MSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('bus1MSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('bus1MSP.peer')"
+
 
 Capabilities:
   Channel: &ChannelCapabilities
@@ -127,6 +145,7 @@ Profiles:
       SampleConsortium:
         Organizations:
           - *Adv1
+          - *Bus1
 
   TwoOrgsChannel:
     Consortium: SampleConsortium
@@ -135,5 +154,6 @@ Profiles:
       <<: *ApplicationDefaults
       Organizations:
         - *Adv1
+        - *Bus1
       Capabilities:
         <<: *ApplicationCapabilities

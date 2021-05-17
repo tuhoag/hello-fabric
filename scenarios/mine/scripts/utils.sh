@@ -58,7 +58,17 @@ function selectPeer() {
     export CORE_PEER_TLS_ROOTCERT_FILE=${ORGANIZATION_OUTPUTS}/peerOrganizations/${ORG_NAME}.${PROJECT_NAME}.com/peers/peer${PEER_NAME}.${ORG_NAME}.${PROJECT_NAME}.com/tls/ca.crt
     # $PEER0_ORG1_CA
     export CORE_PEER_MSPCONFIGPATH=${ORGANIZATION_OUTPUTS}/peerOrganizations/${ORG_NAME}.${PROJECT_NAME}.com/users/Admin@${ORG_NAME}.${PROJECT_NAME}.com/msp
-    export CORE_PEER_ADDRESS=localhost:7051
+
+    if [ $ORG_NAME = "adv1" ]; then
+        export CORE_PEER_ADDRESS=localhost:7051
+    elif [[ $ORG_NAME = "bus1" ]]; then
+        export CORE_PEER_ADDRESS=localhost:9051
+    fi
+
+    infoln $CORE_PEER_ADDRESS
+
+
+    # export CORE_PEER_ADDRESS=localhost:9051
 
     if [ "$VERBOSE" == "true" ]; then
         env | grep CORE
@@ -73,7 +83,7 @@ function getChannelTxPath() {
 
 function getBlockPath() {
     channel_name=$1
-    block_path="$CHANNEL_PATH/${channel_name}.block"
+    block_path="${CHANNEL_PATH}/${channel_name}.block"
     # return $block_path
 }
 
