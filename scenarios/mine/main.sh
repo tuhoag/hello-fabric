@@ -42,6 +42,10 @@ function monitor() {
     $SCRIPTS_DIR/monitor.sh
 }
 
+function deployCC() {
+    echo deployling CC
+}
+
 MODE=$1
 
 if [ $MODE = "restart" ]; then
@@ -60,10 +64,18 @@ elif [ $MODE = "up" ]; then
     networkUp
 elif [ $MODE = "monitor" ]; then
     monitor
-elif [ $MODE = "channel create" ]; then
-    createChannel
-elif [ $MODE = "join" ]; then
-    joinChannel
+elif [ $MODE = "channel" ]; then
+    SUB_MODE=$2
+
+    if [ $SUB_MODE = "create" ]; then
+        createChannel
+    elif [ $SUB_MODE = "join" ]; then
+        joinChannel
+    else
+        echo "Unsupported $MODE $SUB_MODE command."
+    fi
+elif [ $MODE = "chaincode" ]; then
+    deployCC
 else
     echo "Unsupported $MODE command."
 fi
