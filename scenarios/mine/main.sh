@@ -19,6 +19,11 @@ function createChannel() {
     $SCRIPTS_DIR/gen-channel.sh "mychannel" "adv" 0
 }
 
+function joinChannel() {
+    $SCRIPTS_DIR/join-channel.sh "mychannel" "adv" 0 0
+    $SCRIPTS_DIR/join-channel.sh "mychannel" "bus" 0 0
+}
+
 function networkUp() {
     $SCRIPTS_DIR/start.sh $LOG_LEVEL
 }
@@ -45,6 +50,7 @@ if [ $MODE = "restart" ]; then
     initialize
     networkUp
     createChannel
+    joinChannel
 
 elif [ $MODE = "init" ]; then
     initialize
@@ -54,6 +60,10 @@ elif [ $MODE = "up" ]; then
     networkUp
 elif [ $MODE = "monitor" ]; then
     monitor
-elif [ $MODE = "channel" ]; then
+elif [ $MODE = "channel create" ]; then
     createChannel
+elif [ $MODE = "join" ]; then
+    joinChannel
+else
+    echo "Unsupported $MODE command."
 fi

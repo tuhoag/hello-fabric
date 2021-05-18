@@ -7,8 +7,8 @@ services:
         command: orderer
         environment:
             - FABRIC_LOGGING_SPEC=${FABRIC_LOG}
-            # - ORDERER_GENERAL_LISTENADDRESS=orderer.${PROJECT_NAME}.com
-            - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+            - ORDERER_GENERAL_LISTENADDRESS=orderer.${PROJECT_NAME}.com
+            # - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
             - ORDERER_GENERAL_LISTENPORT=7050
             - ORDERER_GENERAL_GENESISMETHOD=file
             - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block

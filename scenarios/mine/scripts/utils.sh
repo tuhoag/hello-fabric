@@ -63,6 +63,7 @@ function selectPeer() {
 
     infoln "Selecting organization $org_name's peer$peer_id with port $port"
 
+    export CORE_PEER_TLS_ENABLED=true
     export CORE_PEER_LOCALMSPID="${org_name}MSP"
     export CORE_PEER_ADDRESS=0.0.0.0:${port}
     export PEER_ORG_CA=${ORGANIZATION_OUTPUTS}/peerOrganizations/$org_domain/peers/$peer_domain/tls/ca.crt

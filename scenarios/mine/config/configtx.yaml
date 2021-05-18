@@ -87,7 +87,7 @@ Application: &ApplicationDefaults
 Orderer: &OrdererDefaults
   OrdererType: etcdraft
   Addresses:
-    - order.promark.com:7050
+    - orderer.promark.com:7050
 
   EtcdRaft:
     Consenters:

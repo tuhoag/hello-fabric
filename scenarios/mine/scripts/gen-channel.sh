@@ -15,8 +15,10 @@ function createChannel() {
     getBlockPath $channel_name
 
     println "Creating channel..."
+    set -x
     peer channel create -o $ORDERER_ADDRESS --ordererTLSHostnameOverride $ORDERER_HOSTNAME -c $channel_name -f $channel_tx_path --outputBlock $block_path --tls --cafile $ORDERER_CA
-
+    res=$?
+    { set +x; } 2>/dev/null
 
 	# cat log.txt
 	# verifyResult $res "Channel creation failed"
