@@ -1,37 +1,25 @@
 #!/bin/bash
 
-. $PWD/scripts/settings.sh
-. $PWD/scripts/init.sh
-. $PWD/scripts/utils.sh
+. $SCRIPTS_DIR/utils.sh
 
 
 function createChannel() {
     local channel_name=$1
-    local org_name=$2
-    local MAX_RETRY=3
-    local DELAY="3"
-    local MAX_RETRY="2"
-    local VERBOSE="false"
+    local org_type=$2
+    local org_id=$3
 
-    selectPeer $org_name 0
+    selectPeer $org_type $org_id 0
 
+    println "Generating channel tx..."
     getChannelTxPath $channel_name
     getBlockPath $channel_name
 
-	local rc=1
-	local num_tries=1
-	while [ $rc -ne 0 -a $num_tries -lt $MAX_RETRY ] ; do
-		sleep $DELAY
+    println "Creating channel..."
+    peer channel create -o $ORDERER_ADDRESS --ordererTLSHostnameOverride $ORDERER_HOSTNAME -c $channel_name -f $channel_tx_path --outputBlock $block_path --tls --cafile $ORDERER_CA
 
-		set -x
-		peer channel create -o localhost:7050 -c $channel_name --ordererTLSHostnameOverride orderer.$PROJECT_NAME.com -f $channel_tx_path --outputBlock $block_path --tls --cafile $ORDERER_CA >&log.txt
-		res=$?
-		{ set +x; } 2>/dev/null
-		let rc=$res
-		num_tries=$(expr $num_tries + 1)
-	done
+
 	# cat log.txt
-	verifyResult $res "Channel creation failed"
+	# verifyResult $res "Channel creation failed"
 }
 
-createChannel $1 $2
+createChannel $1 $2 $3

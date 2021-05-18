@@ -1,13 +1,11 @@
 #!/bin/bash
 
-. $PWD/scripts/init.sh
-. $PWD/scripts/utils.sh
-. $PWD/scripts/settings.sh
+. $SCRIPTS_DIR/utils.sh
 
 
 infoln "Cleaning the repository"
 
-$PWD/scripts/stop.sh
+$SCRIPTS_DIR/stop.sh
 
 # remove organizations
 rm -rf $ORGANIZATION_OUTPUTS

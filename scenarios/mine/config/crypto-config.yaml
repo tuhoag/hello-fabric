@@ -1,0 +1,32 @@
+OrdererOrgs:
+  - Name: orderer
+    Domain: promark.com
+    Specs:
+      - Hostname: orderer
+        SANS:
+          - "localhost"
+          # - "127.0.0.1"
+          # - "0.0.0.0"
+
+PeerOrgs:
+  - Name: adv0
+    Domain: adv0.promark.com
+    Template:
+      Count: 1
+      SANS:
+        - "localhost"
+        - "127.0.0.1"
+        - "0.0.0.0"
+    Users:
+      Count: 1
+
+  - Name: bus0
+    Domain: bus0.promark.com
+    Template:
+      Count: 1
+      SANS:
+        - "localhost"
+        - "127.0.0.1"
+        - "0.0.0.0"
+    Users:
+      Count: 1

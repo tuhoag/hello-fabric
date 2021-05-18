@@ -1,8 +1,6 @@
 #!/bin/bash
 
-. $PWD/scripts/init.sh
-. $PWD/scripts/utils.sh
-. $PWD/scripts/settings.sh
+. $SCRIPTS_DIR/utils.sh
 
 function startNetwork() {
     local log_level=$1

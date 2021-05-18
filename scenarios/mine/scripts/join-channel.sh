@@ -1,7 +1,6 @@
 #!/bin/bash
 
-. $PWD/scripts/init.sh
-. $PWD/scripts/utils.sh
+. $SCRIPTS_DIR/utils.sh
 
 function joinChannel() {
     local channel_name=$1

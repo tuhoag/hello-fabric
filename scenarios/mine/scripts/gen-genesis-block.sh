@@ -1,8 +1,6 @@
 #!/bin/bash
 
-. $PWD/scripts/settings.sh
-. $PWD/scripts/init.sh
-. $PWD/scripts/utils.sh
+. $SCRIPTS_DIR/utils.sh
 
 function generateGenesisBlock() {
     which configtxgen

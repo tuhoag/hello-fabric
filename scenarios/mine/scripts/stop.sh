@@ -1,7 +1,6 @@
 #!/bin/bash
 
-. $PWD/scripts/init.sh
-. $PWD/scripts/utils.sh
+. $SCRIPTS_DIR/utils.sh
 
 infoln "Stopping the network"
 

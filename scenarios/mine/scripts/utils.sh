@@ -44,35 +44,30 @@ function verifyResult() {
 }
 
 function selectPeer() {
-    local ORG_NAME=$1
-    local PEER_NAME=$2
-    #   local USING_ORG=""
-    #   if [ -z "$OVERRIDE_ORG" ]; then
-    #     USING_ORG=$1
-    #   else
-    #     USING_ORG="${OVERRIDE_ORG}"
-    #   fi
-    infoln "Selecting organization ${ORG_NAME}'s peer${PEER_NAME}"
+    local org_type=$1
+    local org_id=$2
+    local peer_id=$3
 
-    export CORE_PEER_LOCALMSPID="${ORG_NAME}MSP"
-    export CORE_PEER_TLS_ROOTCERT_FILE=${ORGANIZATION_OUTPUTS}/peerOrganizations/${ORG_NAME}.${PROJECT_NAME}.com/peers/peer${PEER_NAME}.${ORG_NAME}.${PROJECT_NAME}.com/tls/ca.crt
-    # $PEER0_ORG1_CA
-    export CORE_PEER_MSPCONFIGPATH=${ORGANIZATION_OUTPUTS}/peerOrganizations/${ORG_NAME}.${PROJECT_NAME}.com/users/Admin@${ORG_NAME}.${PROJECT_NAME}.com/msp
-
-    if [ $ORG_NAME = "adv1" ]; then
-        export CORE_PEER_ADDRESS=localhost:7051
-    elif [[ $ORG_NAME = "bus1" ]]; then
-        export CORE_PEER_ADDRESS=localhost:9051
+    # calculate port
+    if [ $org_type = "adv" ]; then
+        local base_port=$ADV_BASE_PORT
+    elif [ $org_type = "bus" ]; then
+        local base_port=$BUS_BASE_PORT
+    else
+        errorln "Org type $org_type is unsupported."
     fi
+    local port=$(($base_port + $org_id * 100 + $peer_id))
+    local org_name="$org_type$org_id"
+    local org_domain=$org_name.$PROJECT_NAME.com
+    local peer_domain=peer$peer_id.$org_domain
 
-    infoln $CORE_PEER_ADDRESS
+    infoln "Selecting organization $org_name's peer$peer_id with port $port"
 
-
-    # export CORE_PEER_ADDRESS=localhost:9051
-
-    if [ "$VERBOSE" == "true" ]; then
-        env | grep CORE
-    fi
+    export CORE_PEER_LOCALMSPID="${org_name}MSP"
+    export CORE_PEER_ADDRESS=0.0.0.0:${port}
+    export PEER_ORG_CA=${ORGANIZATION_OUTPUTS}/peerOrganizations/$org_domain/peers/$peer_domain/tls/ca.crt
+    export CORE_PEER_TLS_ROOTCERT_FILE=$PEER_ORG_CA
+    export CORE_PEER_MSPCONFIGPATH=${ORGANIZATION_OUTPUTS}/peerOrganizations/$org_domain/users/Admin@$org_domain/msp
 }
 
 function getChannelTxPath() {

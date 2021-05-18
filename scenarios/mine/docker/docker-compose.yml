@@ -1,9 +1,9 @@
 version: '2'
 
-volumes:
-    orderer.promark.com:
-    peer0.adv1.promark.com:
-    peer0.bus1.promark.com:
+# volumes:
+    # orderer.promark.com:
+    # peer0.adv0.promark.com:
+    # peer0.bus0.promark.com:
 
 networks:
     test:
@@ -11,164 +11,71 @@ networks:
 services:
     orderer.promark.com:
         container_name: orderer.promark.com
-        image: hyperledger/fabric-orderer:$IMAGE_TAG
+        extends:
+            file: docker-compose-base.yml
+            service: orderer-base
         ports:
             - 7050:7050
+            # - 7052:9443
         networks:
             - test
-        working_dir: /opt/gopath/src/github.com/hyperledger/fabric
-        command: orderer
         environment:
-            # - FABRIC_LOGGING_SPEC=INFO
-            - FABRIC_LOGGING_SPEC=${FABRIC_LOG}
-            - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
-            - ORDERER_GENERAL_LISTENPORT=7050
-            - ORDERER_GENERAL_GENESISMETHOD=file
-            - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
-            - ORDERER_GENERAL_LOCALMSPID=ordererMSP
-            - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
-            # enabled TLS
-            - ORDERER_GENERAL_TLS_ENABLED=true
-            - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
-            - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
-            - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
-            - ORDERER_KAFKA_TOPIC_REPLICATIONFACTOR=1
-            - ORDERER_KAFKA_VERBOSE=true
-            - ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE=/var/hyperledger/orderer/tls/server.crt
-            - ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY=/var/hyperledger/orderer/tls/server.key
-            - ORDERER_GENERAL_CLUSTER_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
-
+            - CORE_OPERATIONS_LISTENADDRESS=orderer.${PROJECT_NAME}.com:9443
         volumes:
             - ../channels/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
             - ../organizations/ordererOrganizations/${PROJECT_NAME}.com/orderers/orderer.${PROJECT_NAME}.com/msp:/var/hyperledger/orderer/msp
             - ../organizations/ordererOrganizations/${PROJECT_NAME}.com/orderers/orderer.${PROJECT_NAME}.com/tls/:/var/hyperledger/orderer/tls
-            - orderer.promark.com:/var/hyperledger/production/orderer
-            # - ../volumes/orderer.${PROJECT_NAME}.com:/var/hyperledger/production/orderer
 
-    # couchdb0:
-    #     container_name: couchdb0
-    #     image: couchdb:3.1.1
-    #     # Populate the COUCHDB_USER and COUCHDB_PASSWORD to set an admin user and password
-    #     # for CouchDB.  This will prevent CouchDB from operating in an "Admin Party" mode.
-    #     environment:
-    #         - COUCHDB_USER=admin
-    #         - COUCHDB_PASSWORD=adminpw
-    #     # Comment/Uncomment the port mapping if you want to hide/expose the CouchDB service,
-    #     # for example map it to utilize Fauxton User Interface in dev environments.
-    #     ports:
-    #         - "5984:5984"
-    #     networks:
-    #         - test
-
-    peer0.adv1.promark.com:
-        container_name: peer0.adv1.promark.com
-        image: hyperledger/fabric-peer:$IMAGE_TAG
-        working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
-        command: peer node start
+    peer0.adv0.promark.com:
+        container_name: peer0.adv0.promark.com
+        extends:
+            file: docker-compose-base.yml
+            service: peer-base
         ports:
-            - 7051:7051
+            - 1050:7051
         networks:
             - test
-        # depends_on:
-        #     - couchdb0
-        environment:
-            # Generic peer variables
-            - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-            # the following setting starts chaincode containers on the same
-            # bridge network as the peers
-            # https://docs.docker.com/compose/networking/
-            - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_test
-            # - FABRIC_LOGGING_SPEC=INFO
-            - FABRIC_LOGGING_SPEC=${FABRIC_LOG}
-            - CORE_PEER_TLS_ENABLED=true
-            - CORE_PEER_PROFILE_ENABLED=true
-            - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
-            - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
-            - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
-            # Peer specific variabes
-            - CORE_PEER_ID=peer0.adv1.${COMPOSE_PROJECT_NAME}.com
-            - CORE_PEER_ADDRESS=peer0.adv1.${COMPOSE_PROJECT_NAME}.com:7051
-            - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
-            - CORE_PEER_CHAINCODEADDRESS=peer0.adv1.${COMPOSE_PROJECT_NAME}.com:7052
-            - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
-            - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.adv1.${COMPOSE_PROJECT_NAME}.com:7051
-            - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.adv1.${COMPOSE_PROJECT_NAME}.com:7051
-            - CORE_PEER_LOCALMSPID=adv1MSP
-            # - FABRIC_CFG_PATH=/etc/hyperledger/fabric/core.yaml
-
-            # - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
-            # - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb0:5984
-            # # The CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME and CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD
-            # # provide the credentials for ledger to connect to CouchDB.  The username and password must
-            # # match the username and password set for the associated CouchDB.
-            # - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=admin
-            # - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=adminpw
-        volumes:
-            - /var/run/docker.sock:/host/var/run/docker.sock
-            - ../organizations/peerOrganizations/adv1.${PROJECT_NAME}.com/peers/peer0.adv1.${PROJECT_NAME}.com/msp:/etc/hyperledger/fabric/msp
-            - ../organizations/peerOrganizations/adv1.${PROJECT_NAME}.com/peers/peer0.adv1.${PROJECT_NAME}.com/tls:/etc/hyperledger/fabric/tls
-            - peer0.bus1.${PROJECT_NAME}.com:/var/hyperledger/production
-            # - ../volumes/peer0.adv1.${PROJECT_NAME}.com:/var/hyperledger/production
-            # - ../config/core.yaml:/etc/hyperledger/fabric/core.yaml
-
-    peer0.bus1.promark.com:
-        container_name: peer0.bus1.promark.com
-        image: hyperledger/fabric-peer:$IMAGE_TAG
-        working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
-        command: peer node start
-        ports:
-            - 9051:9051
-        networks:
-            - test
-        environment:
-            #Generic peer variables
-            - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-            # the following setting starts chaincode containers on the same
-            # bridge network as the peers
-            # https://docs.docker.com/compose/networking/
-            - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${PROJECT_NAME}_test
-            # - FABRIC_LOGGING_SPEC=INFO
-            - FABRIC_LOGGING_SPEC=${FABRIC_LOG}
-            - CORE_PEER_TLS_ENABLED=true
-            - CORE_PEER_PROFILE_ENABLED=true
-            - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
-            - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
-            - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
-            # Peer specific variabes
-            - CORE_PEER_ID=peer0.bus1.${PROJECT_NAME}.com
-            - CORE_PEER_ADDRESS=peer0.bus1.${PROJECT_NAME}.com:9051
-            - CORE_PEER_LISTENADDRESS=0.0.0.0:9051
-            - CORE_PEER_CHAINCODEADDRESS=peer0.bus1.${PROJECT_NAME}.com:9052
-            - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:9052
-            - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.bus1.${PROJECT_NAME}.com:9051
-            - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.bus1.${PROJECT_NAME}.com:9051
-            - CORE_PEER_LOCALMSPID=bus1MSP
-        volumes:
-            - /var/run/docker.sock:/host/var/run/docker.sock
-            - ../organizations/peerOrganizations/bus1.${PROJECT_NAME}.com/peers/peer0.bus1.${PROJECT_NAME}.com/msp:/etc/hyperledger/fabric/msp
-            - ../organizations/peerOrganizations/bus1.${PROJECT_NAME}.com/peers/peer0.bus1.${PROJECT_NAME}.com/tls:/etc/hyperledger/fabric/tls
-            - peer0.bus1.${PROJECT_NAME}.com:/var/hyperledger/production
-            # - ../volumes/peer0.bus1.${PROJECT_NAME}.com:/var/hyperledger/production
-
-    cli:
-        container_name: cli
-        image: hyperledger/fabric-tools:$IMAGE_TAG
-        tty: true
-        stdin_open: true
-        environment:
-            - GOPATH=/opt/gopath
-            - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-            # - FABRIC_LOGGING_SPEC=INFO
-            - FABRIC_LOGGING_SPEC=DEBUG
-        working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
-        command: /bin/bash
-        volumes:
-            - /var/run/:/host/var/run/
-            - ../organizations:/opt/gopath/src/github.com/hyperledger/fabric/peer/organizations
-            - ../scripts:/opt/gopath/src/github.com/hyperledger/fabric/peer/scripts/
-            - ../config:/opt/gopath/src/github.com/hyperledger/fabric/peer/config/
         depends_on:
-            - peer0.adv1.${PROJECT_NAME}.com
-            - peer0.bus1.${PROJECT_NAME}.com
+            - orderer.${COMPOSE_PROJECT_NAME}.com
+        environment:
+            - CORE_PEER_ID=peer0.adv0.${COMPOSE_PROJECT_NAME}.com
+            - CORE_PEER_ADDRESS=peer0.adv0.${COMPOSE_PROJECT_NAME}.com:7051
+            - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
+            - CORE_PEER_CHAINCODEADDRESS=peer0.adv0.${COMPOSE_PROJECT_NAME}.com:7052
+            - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
+            - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.adv0.${COMPOSE_PROJECT_NAME}.com:7051
+            - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.adv0.${COMPOSE_PROJECT_NAME}.com:7051
+            - CORE_PEER_LOCALMSPID=adv0MSP
+
+        volumes:
+            - /var/run/docker.sock:/host/var/run/docker.sock
+            - ../organizations/peerOrganizations/adv0.${PROJECT_NAME}.com/peers/peer0.adv0.${PROJECT_NAME}.com/msp:/etc/hyperledger/fabric/msp
+            - ../organizations/peerOrganizations/adv0.${PROJECT_NAME}.com/peers/peer0.adv0.${PROJECT_NAME}.com/tls:/etc/hyperledger/fabric/tls
+            # - peer0.adv0.${PROJECT_NAME}.com:/var/hyperledger/production
+
+    peer0.bus0.promark.com:
+        container_name: peer0.bus0.promark.com
+        extends:
+            file: docker-compose-base.yml
+            service: peer-base
+        ports:
+            - 2050:7051
         networks:
             - test
+        depends_on:
+            - orderer.${COMPOSE_PROJECT_NAME}.com
+        environment:
+            - CORE_PEER_ID=peer0.bus0.${PROJECT_NAME}.com
+            - CORE_PEER_ADDRESS=peer0.bus0.${PROJECT_NAME}.com:7051
+            - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
+            - CORE_PEER_CHAINCODEADDRESS=peer0.bus0.${PROJECT_NAME}.com:7052
+            - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
+            - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.bus0.${PROJECT_NAME}.com:7051
+            - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.bus0.${PROJECT_NAME}.com:7051
+            - CORE_PEER_LOCALMSPID=bus0MSP
+        volumes:
+            - /var/run/docker.sock:/host/var/run/docker.sock
+            - ../organizations/peerOrganizations/bus0.${PROJECT_NAME}.com/peers/peer0.bus0.${PROJECT_NAME}.com/msp:/etc/hyperledger/fabric/msp
+            - ../organizations/peerOrganizations/bus0.${PROJECT_NAME}.com/peers/peer0.bus0.${PROJECT_NAME}.com/tls:/etc/hyperledger/fabric/tls
+            # - peer0.bus0.${PROJECT_NAME}.com:/var/hyperledger/production
+            # - ../volumes/peer0.bus0.${PROJECT_NAME}.com:/var/hyperledger/production

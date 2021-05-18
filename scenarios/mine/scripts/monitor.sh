@@ -5,28 +5,20 @@
 #
 # More information at https://github.com/gliderlabs/logspout/tree/master/httpstream
 
-if [ -z "$1" ]; then
-   DOCKER_NETWORK=basicnetwork_basic
-else
-   DOCKER_NETWORK="$1"
-fi
+. $SCRIPTS_DIR/utils.sh
 
-if [ -z "$2" ]; then
-   PORT=8000
-else
-   PORT="$2"
-fi
+echo Starting monitoring on all containers on the network $NETWORK_NAME
 
-echo Starting monitoring on all containers on the network ${DOCKER_NETWORK}
+echo $NETWORK_NAME
+echo $LOGSPOUT_PORT
 
 docker kill logspout 2> /dev/null 1>&2 || true
 docker rm logspout 2> /dev/null 1>&2 || true
 
 docker run -d --name="logspout" \
 	--volume=/var/run/docker.sock:/var/run/docker.sock \
-	--publish=127.0.0.1:${PORT}:80 \
-	--network  ${DOCKER_NETWORK} \
+	--publish=127.0.0.1:${LOGSPOUT_PORT}:80 \
+	--network  ${NETWORK_NAME} \
 	gliderlabs/logspout
 sleep 3
-curl http://127.0.0.1:${PORT}/logs
-# echo "Accessing to http://127.0.0.1:${PORT}/logs to read the log"
+curl http://127.0.0.1:${LOGSPOUT_PORT}/logs
