@@ -50,6 +50,11 @@ function packageChaincode() {
 function installChaincode() {
     $SCRIPTS_DIR/install-chaincode.sh $CHAINCODE_NAME $CHANNEL_NAME "adv" 0 0
     $SCRIPTS_DIR/install-chaincode.sh $CHAINCODE_NAME $CHANNEL_NAME "bus" 0 0
+
+    $SCRIPTS_DIR/approve-chaincode.sh $CHAINCODE_NAME $CHANNEL_NAME "adv" 0 0
+    $SCRIPTS_DIR/approve-chaincode.sh $CHAINCODE_NAME $CHANNEL_NAME "bus" 0 0
+
+    $SCRIPTS_DIR/commit-chaincode.sh $CHAINCODE_NAME $CHAINCODE_NAME 1 1
 }
 
 MODE=$1
