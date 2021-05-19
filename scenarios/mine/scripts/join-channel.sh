@@ -16,12 +16,11 @@ function joinChannel() {
 
     getBlockPath $channel_name
 
-	## Sometimes Join takes time, hence retry
-    # set -x
-    peer channel join -b $block_path >&log.txt
+    set -x
+    peer channel join -b $block_path
     res=$?
-    # { set +x; } 2>/dev/null
-    # cat log.txt
+    { set +x; } 2>/dev/null
+    cat log.txt
 
 }
 

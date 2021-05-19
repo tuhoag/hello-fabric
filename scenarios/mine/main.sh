@@ -2,9 +2,10 @@
 
 . $PWD/settings.sh
 
-export CHANNEL_NAME="my_channel"
+export CHANNEL_NAME="mychannel"
 export LOG_LEVEL=INFO
 export FABRIC_LOGGING_SPEC=DEBUG
+export CHAINCODE_NAME="main"
 
 function initialize() {
     # generate all organizations
@@ -15,13 +16,13 @@ function initialize() {
 }
 
 function createChannel() {
-    $SCRIPTS_DIR/gen-channel-tx.sh "mychannel"
-    $SCRIPTS_DIR/gen-channel.sh "mychannel" "adv" 0
+    $SCRIPTS_DIR/gen-channel-tx.sh $CHANNEL_NAME
+    $SCRIPTS_DIR/gen-channel.sh $CHANNEL_NAME "adv" 0
 }
 
 function joinChannel() {
-    $SCRIPTS_DIR/join-channel.sh "mychannel" "adv" 0 0
-    $SCRIPTS_DIR/join-channel.sh "mychannel" "bus" 0 0
+    $SCRIPTS_DIR/join-channel.sh $CHANNEL_NAME "adv" 0 0
+    $SCRIPTS_DIR/join-channel.sh $CHANNEL_NAME "bus" 0 0
 }
 
 function networkUp() {
@@ -42,8 +43,13 @@ function monitor() {
     $SCRIPTS_DIR/monitor.sh
 }
 
-function deployCC() {
-    echo deployling CC
+function packageChaincode() {
+    $SCRIPTS_DIR/package-chaincode.sh $CHAINCODE_NAME
+}
+
+function installChaincode() {
+    $SCRIPTS_DIR/install-chaincode.sh $CHAINCODE_NAME $CHANNEL_NAME "adv" 0 0
+    $SCRIPTS_DIR/install-chaincode.sh $CHAINCODE_NAME $CHANNEL_NAME "bus" 0 0
 }
 
 MODE=$1
@@ -75,7 +81,16 @@ elif [ $MODE = "channel" ]; then
         echo "Unsupported $MODE $SUB_MODE command."
     fi
 elif [ $MODE = "chaincode" ]; then
-    deployCC
+    SUB_MODE=$2
+
+    if [ $SUB_MODE = "package" ]; then
+        packageChaincode
+    elif [ $SUB_MODE = "install" ]; then
+        installChaincode
+    else
+        echo "Unsupported $MODE $SUB_MODE command."
+    fi
+    # deployCC "campaign"
 else
     echo "Unsupported $MODE command."
 fi
