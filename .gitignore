@@ -2,3 +2,5 @@
 log.txt
 /scenarios/mine/volumes
 /scenarios/mine/organizations
+/scenarios/mine/chaincode/vendor
+*.tar.gz
