@@ -15,10 +15,9 @@ function approveForMyOrg() {
 
     selectPeer $orgType $orgId $peerId
 
-    local packageId=$(peer lifecycle chaincode queryinstalled)
-    packageId=${packageId%,*}
-    packageId=${packageId#*:}
-    packageId=${packageId##* }
+    packageName="${chaincodeName}_1.0"
+    packageId=$(getPackageId $packageName)
+
     infoln "My package id: $packageId"
 
     set -x
@@ -26,10 +25,23 @@ function approveForMyOrg() {
     res=$?
     { set +x; } 2>/dev/null
 
-    cat log.txt
+    set -x
+    result=$(peer lifecycle chaincode checkcommitreadiness --channelID $channelName --name $chaincodeName --version "1.0" --sequence 1)
+    # res=$?
+    # echo $result
+    # res=$(echo $result | sed -n "s/${CORE_PEER_LOCALMSPID}:*.//p")
+    { set +x; } 2>/dev/null
 
-    verifyResult $res "Chaincode definition approved on ${peer_name} on channel '$channelName' failed"
-    successln "Chaincode definition approved on ${peer_name} on channel '$channelName'"
+    if [[ $result =~ "${CORE_PEER_LOCALMSPID}: true" ]]; then
+        successln "Chaincode definition approved on ${peer_name} on channel '$channelName'"
+    else
+        fatalln "Chaincode is not approved on ${peer_name} on channel '$channelName'"
+    fi
+
+    # packageId=$(echo "$packageInfo" | sed -n "s/Package ID: ${packageName}:*.//; s/, Label: ${packageName}$//p")
+    # echo $res
+    # verifyResult $res "Chaincode definition approved on ${peer_name} on channel '$channelName' failed"
+    # successln "Chaincode definition approved on ${peer_name} on channel '$channelName'"
 }
 
 approveForMyOrg $1 $2 $3 $4 $5

@@ -16,8 +16,10 @@ function joinChannel() {
 
     getBlockPath $channel_name
 
+    peer channel getinfo -c $channel_name
+
     set -x
-    peer channel join -b $block_path
+    peer channel join -o $ORDERER_ADDRESS --ordererTLSHostnameOverride $ORDERER_HOSTNAME --tls --cafile $ORDERER_CA -b $block_path
     res=$?
     { set +x; } 2>/dev/null
     cat log.txt

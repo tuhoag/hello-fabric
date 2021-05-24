@@ -14,68 +14,27 @@ function commitChaincode() {
     infoln "Commiting chaincode $chaincodeName in channel '$channelName'..."
 
     parsePeerConnectionParameters $orgNum $peerNum
-    # res=$?
-    # verifyResult $res "Invoke transaction failed on channel '$CHANNEL_NAME' due to uneven number of peer and org parameters "
 
-    # while 'peer chaincode' command can get the orderer endpoint from the
-    # peer (if join was successful), let's supply it directly as we know
-    # it using the "-o" option
-    # set -x
-    # peer lifecycle chaincode commit -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls --cafile $ORDERER_CA --channelID $CHANNEL_NAME --name ${CC_NAME} $PEER_CONN_PARMS --version ${CC_VERSION} --sequence ${CC_SEQUENCE} ${INIT_REQUIRED} ${CC_END_POLICY} ${CC_COLL_CONFIG} >&log.txt
-    # res=$?
-    # { set +x; } 2>/dev/null
-    # cat log.txt
+    set -x
+    peer lifecycle chaincode commit -o $ORDERER_ADDRESS --ordererTLSHostnameOverride $ORDERER_HOSTNAME  --cafile $ORDERER_CA --channelID $channelName --name $chaincodeName --tls $PEER_CONN_PARMS --version 1.0 --sequence 1 >&log.txt
+
+    { set +x; } 2>/dev/null
+
+    peer lifecycle chaincode querycommitted --channelID $channelName --name $chaincodeName >&log.txt
+
+
     # verifyResult $res "Chaincode definition commit failed on peer0.org${ORG} on channel '$CHANNEL_NAME' failed"
     # successln "Chaincode definition committed on channel '$CHANNEL_NAME'"
 }
 
 function parsePeerConnectionParameters() {
-    local orgNum=$1
-    local peerNum=$2
-
     PEER_CONN_PARMS=""
-    local peerNames=""
+    for orgType in "adv" "bus"; do
+        selectPeer $orgType 0 0
 
-    infoln "$orgNum ; $peerNum"
-
-
-    local maxOrgId=$(($orgNum - 1))
-    local maxPeerId=$(($peerNum - 1))
-
-
-    for orgId in $(seq 0 $maxOrgId); do
-        infoln $orgId
-        for peerId in $(seq 0 $maxPeerId); do
-            for orgType in "adv" "bus"; do
-                local peerName="peer${peerId}.${orgType}${orgId}"
-                infoln "processed $peerName"
-
-                peerNames="$peerNames ${peerName}"
-            done
-
-        done
-
+        PEER_CONN_PARMS="$PEER_CONN_PARMS --peerAddresses $CORE_PEER_ADDRESS"
+        PEER_CONN_PARMS="$PEER_CONN_PARMS --tlsRootCertFiles $CORE_PEER_TLS_ROOTCERT_FILE"
     done
-
-    infoln $peerNames
-
-    # while [ "$#" -gt 0 ]; do
-    #     selectPeer $1
-    #     PEER="peer0.org$1"
-    #     ## Set peer addresses
-    #     PEERS="$PEERS $PEER"
-    #     PEER_CONN_PARMS="$PEER_CONN_PARMS --peerAddresses $CORE_PEER_ADDRESS"
-    #     ## Set path to TLS certificate
-    #     TLSINFO=$(eval echo "--tlsRootCertFiles $CORE_PEER_TLS_ROOTCERT_FILE")
-    #     PEER_CONN_PARMS="$PEER_CONN_PARMS $TLSINFO"
-
-    #     # infoln "PEERS_CONN_PARMS: ${PEER_CONN_PARMS}"
-    #     # infoln "PEERS: ${PEERS}"
-    #     # shift by one to get to the next organization
-    #     shift
-    # done
-    # # remove leading space for output
-    # PEERS="$(echo -e "$PEERS" | sed -e 's/^[[:space:]]*//')"
 }
 
 commitChaincode $1 $2 $3 $4

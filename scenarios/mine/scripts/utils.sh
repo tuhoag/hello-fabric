@@ -83,6 +83,18 @@ function getBlockPath() {
     # return $block_path
 }
 
+function getPackageId() {
+    # packageInfo=$1
+    packageName=$1
+    set -x
+    packageInfo=$(peer lifecycle chaincode queryinstalled) >&log.txt
+    res=$?
+    { set +x; } 2>/dev/null
+
+    packageId=$(echo "$packageInfo" | sed -n "s/Package ID: ${packageName}:*.//; s/, Label: ${packageName}$//p")
+    echo $packageId
+}
+
 export -f errorln
 export -f successln
 export -f infoln

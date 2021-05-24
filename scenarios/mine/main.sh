@@ -4,7 +4,7 @@
 
 export CHANNEL_NAME="mychannel"
 export LOG_LEVEL=INFO
-export FABRIC_LOGGING_SPEC=DEBUG
+export FABRIC_LOGGING_SPEC=INFO
 export CHAINCODE_NAME="main"
 
 function initialize() {
@@ -54,7 +54,7 @@ function installChaincode() {
     $SCRIPTS_DIR/approve-chaincode.sh $CHAINCODE_NAME $CHANNEL_NAME "adv" 0 0
     $SCRIPTS_DIR/approve-chaincode.sh $CHAINCODE_NAME $CHANNEL_NAME "bus" 0 0
 
-    $SCRIPTS_DIR/commit-chaincode.sh $CHAINCODE_NAME $CHAINCODE_NAME 1 1
+    $SCRIPTS_DIR/commit-chaincode.sh $CHAINCODE_NAME $CHANNEL_NAME 1 1
 }
 
 MODE=$1
@@ -64,8 +64,10 @@ if [ $MODE = "restart" ]; then
     clear
     initialize
     networkUp
-    createChannel
-    joinChannel
+    # createChannel
+    # joinChannel
+    # packageChaincode
+    # installChaincode
 
 elif [ $MODE = "init" ]; then
     initialize
