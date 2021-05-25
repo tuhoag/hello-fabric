@@ -19,16 +19,17 @@ function checkCommitReadiness() {
     packageId=$(getPackageId $packageName)
 
     set -x
-    result=$(peer lifecycle chaincode checkcommitreadiness --channelID $channelName --name $chaincodeName --version "1.0" --sequence 1)
+    peer lifecycle chaincode checkcommitreadiness --channelID $channelName --name $chaincodeName --version "1.0" --sequence 1 >&log.txt
     { set +x; } 2>/dev/null
 
-    result=$(echo $result | grep -q "${CORE_PEER_LOCALMSPID}: true")
-    echo $result
-    if [[ ! -z $result ]]; then
-        echo "true"
-    else
-        echo "false"
-    fi
+    cat log.txt
+    # result=$(echo $result | grep -q "${CORE_PEER_LOCALMSPID}: true")
+    # echo $result
+    # if [[ ! -z $result ]]; then
+    #     echo "true"
+    # else
+    #     echo "false"
+    # fi
 }
 
 checkCommitReadiness $1 $2 $3 $4 $5

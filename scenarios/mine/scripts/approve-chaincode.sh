@@ -25,18 +25,19 @@ function approveForMyOrg() {
     res=$?
     { set +x; } 2>/dev/null
 
-    set -x
-    result=$(peer lifecycle chaincode checkcommitreadiness --channelID $channelName --name $chaincodeName --version "1.0" --sequence 1)
-    # res=$?
-    # echo $result
-    # res=$(echo $result | sed -n "s/${CORE_PEER_LOCALMSPID}:*.//p")
-    { set +x; } 2>/dev/null
+    cat log.txt
+    # set -x
+    # result=$(peer lifecycle chaincode checkcommitreadiness --channelID $channelName --name $chaincodeName --version "1.0" --sequence 1)
+    # # res=$?
+    # # echo $result
+    # # res=$(echo $result | sed -n "s/${CORE_PEER_LOCALMSPID}:*.//p")
+    # { set +x; } 2>/dev/null
 
-    if [[ $result =~ "${CORE_PEER_LOCALMSPID}: true" ]]; then
-        successln "Chaincode definition approved on ${peer_name} on channel '$channelName'"
-    else
-        fatalln "Chaincode is not approved on ${peer_name} on channel '$channelName'"
-    fi
+    # if [[ $result =~ "${CORE_PEER_LOCALMSPID}: true" ]]; then
+    #     successln "Chaincode definition approved on ${peer_name} on channel '$channelName'"
+    # else
+    #     fatalln "Chaincode is not approved on ${peer_name} on channel '$channelName'"
+    # fi
 
     # packageId=$(echo "$packageInfo" | sed -n "s/Package ID: ${packageName}:*.//; s/, Label: ${packageName}$//p")
     # echo $res

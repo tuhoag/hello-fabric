@@ -17,6 +17,7 @@ function initialize() {
 
 function createChannel() {
     $SCRIPTS_DIR/create-channel-tx.sh $CHANNEL_NAME
+    sleep 3
     $SCRIPTS_DIR/create-channel.sh $CHANNEL_NAME "adv" 0
 }
 
@@ -50,11 +51,47 @@ function packageChaincode() {
 function installChaincode() {
     $SCRIPTS_DIR/install-chaincode.sh $CHAINCODE_NAME $CHANNEL_NAME "adv" 0 0
     $SCRIPTS_DIR/install-chaincode.sh $CHAINCODE_NAME $CHANNEL_NAME "bus" 0 0
+}
 
+function approveChaincode() {
     $SCRIPTS_DIR/approve-chaincode.sh $CHAINCODE_NAME $CHANNEL_NAME "adv" 0 0
     $SCRIPTS_DIR/approve-chaincode.sh $CHAINCODE_NAME $CHANNEL_NAME "bus" 0 0
+}
 
+function commitChaincode() {
     $SCRIPTS_DIR/commit-chaincode.sh $CHAINCODE_NAME $CHANNEL_NAME 1 1
+}
+
+function queryCommitted() {
+    $SCRIPTS_DIR/query-committed.sh $CHANNEL_NAME "adv" 0 0
+    $SCRIPTS_DIR/query-committed.sh $CHANNEL_NAME "bus" 0 0
+}
+
+function queryInstalled() {
+    $SCRIPTS_DIR/query-installed.sh "adv" 0 0
+    $SCRIPTS_DIR/query-installed.sh "bus" 0 0
+}
+
+function checkCommitReadliness() {
+    $SCRIPTS_DIR/check-commit-readliness.sh $CHAINCODE_NAME $CHANNEL_NAME "adv" 0 0
+    $SCRIPTS_DIR/check-commit-readliness.sh $CHAINCODE_NAME $CHANNEL_NAME "bus" 0 0
+}
+
+function listChaincode() {
+    $SCRIPTS_DIR/list-chaincode.sh $CHANNEL_NAME "adv" 0 0
+    $SCRIPTS_DIR/list-chaincode.sh $CHANNEL_NAME "bus" 0 0
+}
+
+function invokeChaincode() {
+    # insert a campaign
+    # fcn_call='{"function":"'${CC_CREATE_FCN}'","Args":["a1","1","Ken"]}'
+    # fcnCall='{"function":"'CreateCampaign'","Args":["'1'","'Campaign1'","'Adv0'","'Bus0'"]}'
+    # $SCRIPTS_DIR/invoke-chaincode.sh $CHAINCODE_NAME $CHANNEL_NAME 1 1 $fcnCall
+
+    fcnCall='{"function":"'Test'","Args":[]}'
+    $SCRIPTS_DIR/invoke-chaincode.sh $CHAINCODE_NAME $CHANNEL_NAME 1 1 $fcnCall
+
+    #CreateCampaign
 }
 
 MODE=$1
@@ -64,8 +101,8 @@ if [ $MODE = "restart" ]; then
     clear
     initialize
     networkUp
-    # createChannel
-    # joinChannel
+    createChannel
+    joinChannel
     # packageChaincode
     # installChaincode
 
@@ -94,10 +131,32 @@ elif [ $MODE = "chaincode" ]; then
         packageChaincode
     elif [ $SUB_MODE = "install" ]; then
         installChaincode
+    elif [ $SUB_MODE = "approve" ]; then
+        approveChaincode
+    elif [ $SUB_MODE = "commit" ]; then
+        approveChaincode
+    elif [ $SUB_MODE = "list" ]; then
+        listChaincode
+    elif [ $SUB_MODE = "query" ]; then
+        SUB_SUB_MODE=$3
+
+        if [ $SUB_SUB_MODE = "installed" ]; then
+            queryInstalled
+        elif [ $SUB_SUB_MODE = "ready" ]; then
+            checkCommitReadliness
+        elif [ $SUB_SUB_MODE = "committed" ]; then
+            queryCommitted
+        else
+            echo "Unsuported '$MODE $SUB_MODE $SUB_SUB_MODE' command."
+        fi
+
+    elif [ $SUB_MODE = "installed" ]; then
+        queryInstalled
+    elif [ $SUB_MODE = "invoke" ]; then
+        invokeChaincode
     else
-        echo "Unsupported $MODE $SUB_MODE command."
+        echo "Unsupported '$MODE $SUB_MODE' command."
     fi
-    # deployCC "campaign"
 else
     echo "Unsupported $MODE command."
 fi

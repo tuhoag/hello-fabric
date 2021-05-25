@@ -93,6 +93,27 @@ function getPackageId() {
     echo $packageId
 }
 
+
+function parsePeerConnectionParameters() {
+    local maxOrdId=$(($1 - 1))
+    local maxPeerId=$(($2 - 1))
+
+    peerConnectionParams=""
+    peers=""
+    for orgType in "adv" "bus"; do
+        for orgId in $(seq 0 $maxOrdId); do
+            for peerId in $(seq 0 $maxOrdId); do
+                selectPeer $orgType $orgId $peerId
+
+                peers="$peers $CORE_PEER_ADDRESS"
+                peerConnectionParams="$peerConnectionParams --peerAddresses $CORE_PEER_ADDRESS"
+                peerConnectionParams="$peerConnectionParams --tlsRootCertFiles $CORE_PEER_TLS_ROOTCERT_FILE"
+            done
+        done
+    done
+}
+
+
 export -f errorln
 export -f successln
 export -f infoln
