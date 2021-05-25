@@ -39,13 +39,6 @@ function installChaincode() {
     else
         infoln "Package ${packageName} is installed on ${peerName} with id: ${packageId} and won't be installed again."
     fi
-    # set -x
-    # peer lifecycle chaincode install $chaincodePackagePath >&log.txt
-    # res=$?
-    # { set +x; } 2>/dev/null
-    # cat log.txt
-    # verifyResult $res "Chaincode installation on ${peerName} has failed"
-
 }
 
 installChaincode $1 $2 $3 $4 $5

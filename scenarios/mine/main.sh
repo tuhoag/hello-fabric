@@ -4,7 +4,7 @@
 
 export CHANNEL_NAME="mychannel"
 export LOG_LEVEL=INFO
-export FABRIC_LOGGING_SPEC=INFO
+export FABRIC_LOGGING_SPEC=DEBUG
 export CHAINCODE_NAME="main"
 
 function initialize() {
@@ -16,8 +16,8 @@ function initialize() {
 }
 
 function createChannel() {
-    $SCRIPTS_DIR/gen-channel-tx.sh $CHANNEL_NAME
-    $SCRIPTS_DIR/gen-channel.sh $CHANNEL_NAME "adv" 0
+    $SCRIPTS_DIR/create-channel-tx.sh $CHANNEL_NAME
+    $SCRIPTS_DIR/create-channel.sh $CHANNEL_NAME "adv" 0
 }
 
 function joinChannel() {

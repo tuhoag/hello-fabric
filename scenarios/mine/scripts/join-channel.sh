@@ -3,27 +3,27 @@
 . $SCRIPTS_DIR/utils.sh
 
 function joinChannel() {
-    local channel_name=$1
-    local org_type=$2
-    local org_id=$3
-    local peer_id=$4
+    local channelName=$1
+    local orgType=$2
+    local orgId=$3
+    local peerId=$4
 
-    local org_name="${org_type}${org_id}"
-    selectPeer $org_type $org_id $peer_id
+    local orgName="${orgType}${orgId}"
 
-    infoln "Joining Channel $channel_name from Org $org_name's peer$peer_id"
+    infoln "Joining Channel $channelName from peer${peerId}.${orgName}"
 
+    selectPeer $orgType $orgId $peerId
 
-    getBlockPath $channel_name
+    local blockPath=$(getBlockPath $channelName)
 
-    peer channel getinfo -c $channel_name
+    # peer channel getinfo -c $channelName
 
     set -x
-    peer channel join -o $ORDERER_ADDRESS --ordererTLSHostnameOverride $ORDERER_HOSTNAME --tls --cafile $ORDERER_CA -b $block_path
+    peer channel join -o $ORDERER_ADDRESS --ordererTLSHostnameOverride $ORDERER_HOSTNAME --tls --cafile $ORDERER_CA -b $blockPath
     res=$?
     { set +x; } 2>/dev/null
-    cat log.txt
 
+    verifyResult $res "Cannot join $channelName from peer${peerId}.${orgName}"
 }
 
 joinChannel $1 $2 $3 $4

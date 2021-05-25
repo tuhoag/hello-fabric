@@ -15,7 +15,7 @@ Organizations:
         Rule: "OR('ordererMSP.admin')"
 
 
-  - &Adv1
+  - &Adv0
     Name: adv0MSP
     ID: adv0MSP
     MSPDir: ../organizations/peerOrganizations/adv0.promark.com/msp
@@ -35,7 +35,7 @@ Organizations:
     OrdererEndpoints:
       - orderer.promark.com:7050
 
-  - &Bus1
+  - &Bus0
     Name: bus0MSP
     ID: bus0MSP
     MSPDir: ../organizations/peerOrganizations/bus0.promark.com/msp
@@ -146,8 +146,8 @@ Profiles:
     Consortiums:
       SampleConsortium:
         Organizations:
-          - *Adv1
-          - *Bus1
+          - *Adv0
+          - *Bus0
 
   TwoOrgsChannel:
     Consortium: SampleConsortium
@@ -155,7 +155,7 @@ Profiles:
     Application:
       <<: *ApplicationDefaults
       Organizations:
-        - *Adv1
-        - *Bus1
+        - *Adv0
+        - *Bus0
       Capabilities:
         <<: *ApplicationCapabilities
