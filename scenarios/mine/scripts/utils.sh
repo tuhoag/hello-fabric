@@ -87,10 +87,11 @@ function getPackageId() {
     set -x
     packageInfo=$(peer lifecycle chaincode queryinstalled) >&log.txt
     res=$?
+    packageId=$(echo "$packageInfo" | sed -n "s/Package ID: ${packageName}:*//; s/, Label: ${packageName}$//p")
     { set +x; } 2>/dev/null
 
-    packageId=$(echo "$packageInfo" | sed -n "s/Package ID: ${packageName}:*.//; s/, Label: ${packageName}$//p")
-    echo $packageId
+
+    echo "${packageName}:${packageId}"
 }
 
 

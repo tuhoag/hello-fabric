@@ -21,6 +21,10 @@ type Asset struct {
 	Owner string `json:"owner"`
 }
 
+func (s *SmartContract) Test(ctx contractapi.TransactionContextInterface) error {
+	return nil
+}
+
 func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) error {
 	assets := []Asset{
 		{ID: "asset1", Value: 5, Owner: "Tomoko"},

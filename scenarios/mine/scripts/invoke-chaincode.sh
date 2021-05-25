@@ -23,7 +23,4 @@ function invokeChaincode() {
 
 }
 
-
-
-# getChaincodeList $1 $2 $3 $4 $5
 invokeChaincode $1 $2 $3 $4 $5

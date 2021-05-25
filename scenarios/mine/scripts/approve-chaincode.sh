@@ -18,7 +18,7 @@ function approveForMyOrg() {
     packageName="${chaincodeName}_1.0"
     packageId=$(getPackageId $packageName)
 
-    infoln "My package id: $packageId"
+    infoln "My package id:$packageId"
 
     set -x
     peer lifecycle chaincode approveformyorg -o $ORDERER_ADDRESS --ordererTLSHostnameOverride $ORDERER_HOSTNAME --tls --cafile $ORDERER_CA --channelID $channelName --name $chaincodeName --version 1.0 --package-id $packageId --sequence 1 >&log.txt

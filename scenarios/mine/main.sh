@@ -4,7 +4,7 @@
 
 export CHANNEL_NAME="mychannel"
 export LOG_LEVEL=INFO
-export FABRIC_LOGGING_SPEC=DEBUG
+export FABRIC_LOGGING_SPEC=INFO
 export CHAINCODE_NAME="main"
 
 function initialize() {
@@ -88,7 +88,7 @@ function invokeChaincode() {
     # fcnCall='{"function":"'CreateCampaign'","Args":["'1'","'Campaign1'","'Adv0'","'Bus0'"]}'
     # $SCRIPTS_DIR/invoke-chaincode.sh $CHAINCODE_NAME $CHANNEL_NAME 1 1 $fcnCall
 
-    fcnCall='{"function":"'Test'","Args":[]}'
+    fcnCall='{"function":"'CreateAsset'","Args":["a1","1","Ken"]}'
     $SCRIPTS_DIR/invoke-chaincode.sh $CHAINCODE_NAME $CHANNEL_NAME 1 1 $fcnCall
 
     #CreateCampaign
@@ -134,7 +134,7 @@ elif [ $MODE = "chaincode" ]; then
     elif [ $SUB_MODE = "approve" ]; then
         approveChaincode
     elif [ $SUB_MODE = "commit" ]; then
-        approveChaincode
+        commitChaincode
     elif [ $SUB_MODE = "list" ]; then
         listChaincode
     elif [ $SUB_MODE = "query" ]; then
