@@ -96,12 +96,13 @@ function getPackageId() {
 
 
 function parsePeerConnectionParameters() {
-    local maxOrdId=$(($1 - 1))
-    local maxPeerId=$(($2 - 1))
+    IFS=',' read -r -a orgTypes <<< $1
+    local maxOrdId=$(($2 - 1))
+    local maxPeerId=$(($3 - 1))
 
     peerConnectionParams=""
     peers=""
-    for orgType in "adv" "bus"; do
+    for orgType in ${orgTypes[@]}; do
         for orgId in $(seq 0 $maxOrdId); do
             for peerId in $(seq 0 $maxOrdId); do
                 selectPeer $orgType $orgId $peerId

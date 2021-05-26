@@ -5,15 +5,16 @@
 function commitChaincode() {
     local chaincodeName=$1
     local channelName=$2
-    local orgNum=$3
-    local peerNum=$4
+    local orgTypes=$3
+    local orgNum=$4
+    local peerNum=$5
 
     local chaincodePackagePath="$CHAINCODE_PACKAGE_DIR/${chaincodeName}.tar.gz"
     local peerName="peer${peerId}.${orgType}${orgId}"
 
     infoln "Commiting chaincode $chaincodeName in channel '$channelName'..."
 
-    parsePeerConnectionParameters $orgNum $peerNum
+    parsePeerConnectionParameters $orgTypes $orgNum $peerNum
     infoln "peerConnectionParams: $peerConnectionParams"
 
     set -x
@@ -26,4 +27,4 @@ function commitChaincode() {
 }
 
 
-commitChaincode $1 $2 $3 $4
+commitChaincode $1 $2 $3 $4 $5

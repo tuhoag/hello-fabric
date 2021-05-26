@@ -5,11 +5,12 @@
 function invokeChaincode() {
     local chaincodeName=$1
     local channelName=$2
-    local orgNum=$3
-    local peerNum=$4
-    local fcnCall=$5
+    local orgTypes=$3
+    local orgNum=$4
+    local peerNum=$5
+    local fcnCall=$6
 
-    parsePeerConnectionParameters $orgNum $peerNum
+    parsePeerConnectionParameters $orgTypes $orgNum $peerNum
 
     infoln "Invoke fcn call:${fcnCall} on peers: $peers"
 
@@ -23,4 +24,4 @@ function invokeChaincode() {
 
 }
 
-invokeChaincode $1 $2 $3 $4 $5
+invokeChaincode $1 $2 $3 $4 $5 $6
