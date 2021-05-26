@@ -4,3 +4,4 @@ log.txt
 /scenarios/mine/organizations
 /scenarios/mine/chaincode/vendor
 *.tar.gz
+node_modules
