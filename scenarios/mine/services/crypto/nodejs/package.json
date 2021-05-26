@@ -1,0 +1,10 @@
+{
+    "name": "crypto-nodejs",
+    "version": "1.0.0",
+    "author": "Tu Hoang",
+    "license": "MIT",
+    "main": "index.js",
+    "dependencies": {
+        "express": "^4.17.1"
+    }
+}

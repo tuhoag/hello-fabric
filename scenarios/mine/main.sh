@@ -103,6 +103,17 @@ function invokeQueryChaincode() {
     $SCRIPTS_DIR/invoke-query-chaincode.sh $CHAINCODE_NAME $CHANNEL_NAME "adv" 1 1 $fcnCall
 }
 
+function buildCrypto() {
+    FABRIC_LOG=$log_level COMPOSE_PROJECT_NAME=$PROJECT_NAME PROJECT_NAME=$PROJECT_NAME IMAGE_TAG=$FABRIC_VERSION docker-compose -f ${DOCKER_COMPOSE_PATH} build --no-cache crypto.promark.com 2>&1
+
+
+
+    # FABRIC_LOG=$log_level COMPOSE_PROJECT_NAME=$PROJECT_NAME PROJECT_NAME=$PROJECT_NAME IMAGE_TAG=$FABRIC_VERSION docker-compose -f ${DOCKER_COMPOSE_PATH} exec crypto.promark.com bash 2>&1
+}
+
+function runService() {
+    FABRIC_LOG=$log_level COMPOSE_PROJECT_NAME=$PROJECT_NAME PROJECT_NAME=$PROJECT_NAME IMAGE_TAG=$FABRIC_VERSION docker-compose -f ${DOCKER_COMPOSE_PATH} run crypto.promark.com bash 2>&1
+}
 
 MODE=$1
 
@@ -117,7 +128,16 @@ if [ $MODE = "restart" ]; then
     # installChaincode
     # approveChaincode
     # commitChaincode
+elif [ $MODE = "run" ]; then
+    runService
+elif [ $MODE = "build" ]; then
+    SUB_MODE=$2
 
+    if [ $SUB_MODE = "crypto" ]; then
+        buildCrypto
+    else
+        echo "Unsupported '$MODE $SUB_MODE' command."
+    fi
 elif [ $MODE = "init" ]; then
     initialize
 elif [ $MODE = "clear" ]; then

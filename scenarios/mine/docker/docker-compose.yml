@@ -1,14 +1,19 @@
 version: '2'
 
-# volumes:
-    # orderer.promark.com:
-    # peer0.adv0.promark.com:
-    # peer0.bus0.promark.com:
-
 networks:
     test:
 
 services:
+    crypto.promark.com:
+        container_name: crypto.promark.com
+        build:
+            context: .
+            dockerfile: crypto-nodejs-dockerfile
+        volumes:
+            - ../services/crypto/nodejs:/src
+
+
+
     orderer.promark.com:
         container_name: orderer.promark.com
         extends:
@@ -37,6 +42,7 @@ services:
             - test
         depends_on:
             - orderer.${COMPOSE_PROJECT_NAME}.com
+            - crypto.promark.com
         environment:
             - CORE_PEER_ID=peer0.adv0.${COMPOSE_PROJECT_NAME}.com
             - CORE_PEER_ADDRESS=peer0.adv0.${COMPOSE_PROJECT_NAME}.com:7051
@@ -64,6 +70,7 @@ services:
             - test
         depends_on:
             - orderer.${COMPOSE_PROJECT_NAME}.com
+            - crypto.promark.com
         environment:
             - CORE_PEER_ID=peer0.bus0.${PROJECT_NAME}.com
             - CORE_PEER_ADDRESS=peer0.bus0.${PROJECT_NAME}.com:7051
@@ -79,3 +86,4 @@ services:
             - ../organizations/peerOrganizations/bus0.${PROJECT_NAME}.com/peers/peer0.bus0.${PROJECT_NAME}.com/tls:/etc/hyperledger/fabric/tls
             # - peer0.bus0.${PROJECT_NAME}.com:/var/hyperledger/production
             # - ../volumes/peer0.bus0.${PROJECT_NAME}.com:/var/hyperledger/production
+
