@@ -47,9 +47,9 @@ services:
             # - 7052:9443
         networks:
             - test
-        depends_on:
-            # - orderer.${COMPOSE_PROJECT_NAME}.com
-            - crypto.promark.com
+        # depends_on:
+        #     # - orderer.${COMPOSE_PROJECT_NAME}.com
+        #     - crypto.promark.com
         environment:
             - CORE_OPERATIONS_LISTENADDRESS=orderer.${PROJECT_NAME}.com:9443
         volumes:
