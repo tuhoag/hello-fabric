@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"net/http"
 
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
@@ -20,6 +22,7 @@ type Campaign struct {
 	Name       string `json:"name"`
 	Advertiser string `json:"advertiser"`
 	Business   string `json:"business"`
+	Custom     string `json:"custom"`
 }
 
 func (s *SmartContract) Test(ctx contractapi.TransactionContextInterface) error {
@@ -38,11 +41,26 @@ func (s *SmartContract) CreateCampaign(ctx contractapi.TransactionContextInterfa
 		return fmt.Errorf("Cannot create asset since its id %s is existed", id)
 	}
 
+	cryptoAPIAddress := "http://crypto.promark.com:3000"
+	apiEndpoint := fmt.Sprintf("%s/helloworld", cryptoAPIAddress)
+
+	response, err := http.Get(apiEndpoint)
+	if err != nil {
+		return fmt.Errorf("Cannot access to %s: %s", apiEndpoint, err)
+	}
+
+	responseData, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return fmt.Errorf("Cannot parse response data %s", response.Body)
+	}
+	message := string(responseData)
+
 	campaign := Campaign{
 		ID:         id,
 		Name:       name,
 		Advertiser: advertiser,
 		Business:   business,
+		Custom:     message,
 	}
 
 	campaignJSON, err := json.Marshal(campaign)

@@ -19,6 +19,23 @@ services:
         environment:
             - API_PORT=3000
 
+    cli:
+        container_name: cli
+        image: hyperledger/fabric-tools:$IMAGE_TAG
+        tty: true
+        stdin_open: true
+        networks:
+            - test
+        depends_on:
+            - peer0.adv0.promark.com
+            - peer0.bus0.promark.com
+        environment:
+            - GOPATH=/opt/gopath
+            - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+            - FABRIC_LOGGING_SPEC=${FABRIC_LOG}
+        working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+        command: /bin/bash
+
 
     orderer.promark.com:
         container_name: orderer.promark.com
@@ -30,6 +47,9 @@ services:
             # - 7052:9443
         networks:
             - test
+        depends_on:
+            # - orderer.${COMPOSE_PROJECT_NAME}.com
+            - crypto.promark.com
         environment:
             - CORE_OPERATIONS_LISTENADDRESS=orderer.${PROJECT_NAME}.com:9443
         volumes:

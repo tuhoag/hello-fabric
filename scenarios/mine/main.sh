@@ -115,6 +115,10 @@ function runService() {
     FABRIC_LOG=$log_level COMPOSE_PROJECT_NAME=$PROJECT_NAME PROJECT_NAME=$PROJECT_NAME IMAGE_TAG=$FABRIC_VERSION docker-compose -f ${DOCKER_COMPOSE_PATH} run --service-ports crypto.promark.com bash 2>&1
 }
 
+function attachService() {
+    FABRIC_LOG=$log_level COMPOSE_PROJECT_NAME=$PROJECT_NAME PROJECT_NAME=$PROJECT_NAME IMAGE_TAG=$FABRIC_VERSION docker-compose -f ${DOCKER_COMPOSE_PATH} exec peer0.adv0.promark.com sh 2>&1
+}
+
 MODE=$1
 
 if [ $MODE = "restart" ]; then
@@ -125,11 +129,13 @@ if [ $MODE = "restart" ]; then
     createChannel
     joinChannel
     packageChaincode
-    # installChaincode
-    # approveChaincode
-    # commitChaincode
+    installChaincode
+    approveChaincode
+    commitChaincode
 elif [ $MODE = "run" ]; then
     runService
+elif [ $MODE = "attach" ]; then
+    attachService
 elif [ $MODE = "build" ]; then
     SUB_MODE=$2
 
