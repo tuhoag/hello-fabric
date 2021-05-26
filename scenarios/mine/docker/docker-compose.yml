@@ -8,10 +8,16 @@ services:
         container_name: crypto.promark.com
         build:
             context: .
-            dockerfile: crypto-nodejs-dockerfile
+            dockerfile: crypto-python-dockerfile
+        ports:
+            - 3000:3000
         volumes:
-            - ../services/crypto/nodejs:/src
-
+            - ../services/crypto/python:/src
+        command: bash main.sh
+        networks:
+            - test
+        environment:
+            - API_PORT=3000
 
 
     orderer.promark.com:

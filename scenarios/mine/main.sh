@@ -112,7 +112,7 @@ function buildCrypto() {
 }
 
 function runService() {
-    FABRIC_LOG=$log_level COMPOSE_PROJECT_NAME=$PROJECT_NAME PROJECT_NAME=$PROJECT_NAME IMAGE_TAG=$FABRIC_VERSION docker-compose -f ${DOCKER_COMPOSE_PATH} run crypto.promark.com bash 2>&1
+    FABRIC_LOG=$log_level COMPOSE_PROJECT_NAME=$PROJECT_NAME PROJECT_NAME=$PROJECT_NAME IMAGE_TAG=$FABRIC_VERSION docker-compose -f ${DOCKER_COMPOSE_PATH} run --service-ports crypto.promark.com bash 2>&1
 }
 
 MODE=$1
@@ -140,6 +140,8 @@ elif [ $MODE = "build" ]; then
     fi
 elif [ $MODE = "init" ]; then
     initialize
+elif [ $MODE = "down" ]; then
+    networkDown
 elif [ $MODE = "clear" ]; then
     clear
 elif [ $MODE = "up" ]; then
