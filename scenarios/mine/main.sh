@@ -87,19 +87,28 @@ function invokeChaincode() {
     # fcn_call='{"function":"'${CC_CREATE_FCN}'","Args":["a1","1","Ken"]}'
     # fcnCall='{"function":"'CreateCampaign'","Args":["'1'","'Campaign1'","'Adv0'","'Bus0'"]}'
     # $SCRIPTS_DIR/invoke-chaincode.sh $CHAINCODE_NAME $CHANNEL_NAME 1 1 $fcnCall
+    local id="c${RANDOM}"
+    # local currentDate=$(date +'%Y/%m/%d %H')
 
-    fcnCall='{"function":"'CreateCampaign'","Args":["'c1'","'Campaign1'","'Adv0'","'Bus0'"]}'
-    # fcnCall='{"function":"'ReadAllCampaigns'","Args":[]}'
-    # echo "${fcnCall}"
+    local currentDate="2015-05-02T15:02:40.628Z"
+    fcnCall='{"function":"'CreateCampaign'","Args":["'${id}'","'Campaign1'","'Adv0'","'Bus0'","'${currentDate}'"]}'
     $SCRIPTS_DIR/invoke-chaincode.sh $CHAINCODE_NAME $CHANNEL_NAME "adv,bus" 1 1 $fcnCall
 
-    #CreateCampaign
+    id="c${RANDOM}"
+    currentDate="2017-05-02T15:02:40.628Z"
+    fcnCall='{"function":"'CreateCampaign'","Args":["'${id}'","'Campaign1'","'Adv0'","'Bus0'","'${currentDate}'"]}'
+    $SCRIPTS_DIR/invoke-chaincode.sh $CHAINCODE_NAME $CHANNEL_NAME "adv,bus" 1 1 $fcnCall
 }
 
 function invokeQueryChaincode() {
     fcnCall='{"function":"'ReadAllCampaigns'","Args":[]}'
     # fcnCall='{"function":"'ReadAllCampaigns'","Args":[]}'
     # echo "${fcnCall}"
+    $SCRIPTS_DIR/invoke-query-chaincode.sh $CHAINCODE_NAME $CHANNEL_NAME "adv" 1 1 $fcnCall
+
+    local startTime="2014-05-02T15:02:40.628Z"
+    local endTime="2016-05-02T15:02:40.628Z"
+    fcnCall='{"function":"'ReadCampaignsByTimestamp'","Args":["'$startTime'","'$endTime'"]}'
     $SCRIPTS_DIR/invoke-query-chaincode.sh $CHAINCODE_NAME $CHANNEL_NAME "adv" 1 1 $fcnCall
 }
 

@@ -23,6 +23,7 @@ type Campaign struct {
 	Advertiser string `json:"advertiser"`
 	Business   string `json:"business"`
 	Custom     string `json:"custom"`
+	Timestamp  string `json:"timestamp`
 }
 
 func (s *SmartContract) Test(ctx contractapi.TransactionContextInterface) error {
@@ -30,7 +31,7 @@ func (s *SmartContract) Test(ctx contractapi.TransactionContextInterface) error 
 }
 
 // Create a new campaign
-func (s *SmartContract) CreateCampaign(ctx contractapi.TransactionContextInterface, id string, name string, advertiser string, business string) error {
+func (s *SmartContract) CreateCampaign(ctx contractapi.TransactionContextInterface, id string, name string, advertiser string, business string, timestamp string) error {
 	existing, err := ctx.GetStub().GetState(id)
 
 	if err != nil {
@@ -61,6 +62,7 @@ func (s *SmartContract) CreateCampaign(ctx contractapi.TransactionContextInterfa
 		Advertiser: advertiser,
 		Business:   business,
 		Custom:     message,
+		Timestamp: timestamp,
 	}
 
 	campaignJSON, err := json.Marshal(campaign)
@@ -106,6 +108,41 @@ func (s *SmartContract) ReadAllCampaigns(ctx contractapi.TransactionContextInter
 
 	return campaigns, nil
 }
+
+func (s *SmartContract) ReadCampaignsByTimestamp(ctx contractapi.TransactionContextInterface, startTime string, endTime string) ([]*Campaign, error) {
+	queryString := fmt.Sprintf(`{"selector":{"timestamp":{"$gte": "%s","$lte": "%s"}}}`, startTime, endTime)
+
+	resultsIterator, err := ctx.GetStub().GetQueryResult(queryString)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resultsIterator.Close()
+
+	var campaigns []*Campaign
+
+	for resultsIterator.HasNext() {
+		queryResponse, err := resultsIterator.Next()
+
+		if err != nil {
+			return nil, err
+		}
+
+		var campaign Campaign
+		err = json.Unmarshal(queryResponse.Value, &campaign)
+		if err != nil {
+			return nil, err
+		}
+
+		campaigns = append(campaigns, &campaign)
+	}
+
+	resultsIterator.Close()
+
+	return campaigns, nil
+}
+
+
 
 func main() {
 	assetChaincode, err := contractapi.NewChaincode(&SmartContract{})
